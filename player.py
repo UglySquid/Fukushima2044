@@ -27,6 +27,13 @@ class Player(pygame.sprite.Sprite):
         # Create screen
         self.screen = screen
 
+        # Sounds
+        self.pain_sounds = [pygame.mixer.Sound("./audio/pain_sound.wav"), pygame.mixer.Sound("audio\\pain_sound_2.wav"),
+                            pygame.mixer.Sound("./audio/pain_sound_3.wav")]
+        self.death_sounds = [pygame.mixer.Sound("./audio/death_sound.wav"),
+                             pygame.mixer.Sound("./audio/death_sound_2.wav"),
+                             pygame.mixer.Sound("./audio/death_sound_3.wav")]
+
         # Create bullets
         self.bullet_sprites = pygame.sprite.Group()
         self.player_hitpoints = 100
@@ -66,6 +73,10 @@ class Player(pygame.sprite.Sprite):
 
         # new method I found online to change the hitbox so that its smaller
         self.hitbox = self.rect.inflate(-4, -4)
+
+        self.reload_pressed = None
+        self.my_hitbox_visualizer = pygame.Surface(self.hitbox.size)
+        self.my_hitbox_visualizer.fill((255, 0, 0))
 
     def import_assets(self):
         self.player_animations = {'up': [], 'down': [], 'right': [], 'left': [],
@@ -190,12 +201,29 @@ class Player(pygame.sprite.Sprite):
         self.rect.centery = self.hitbox.centery
         self.collisions('vertical')
 
-    def update(self, dt):
+    def update(self, dt, bullet_sprites, player_position, bot_group):
+
+        if self.inventory.player_hitpoints <= 0:
+            channel6 = pygame.mixer.Channel(5)
+            channel6.play(self.death_sounds[random.randint(0, 2)])
+            self.kill()
+        self.screen.blit(self.my_hitbox_visualizer, self.hitbox.topleft)
+        self.keyboard_input(bullet_sprites)
+
+        if self.inventory.weapon and self.reload_pressed is not None:
+            if self.inventory.weapon.bullet_capacity != self.inventory.weapon.max_bullet_capacity:
+                self.inventory.weapon.reload()
+            else:
+                self.reload_pressed = None
+
         self.keyboard_input()
         self.get_status()
 
         self.move(dt)
         self.animate(dt)
+
+        self.rect.center = self.hitbox.center
+        self.inventory.render_player_items(self.hitbox)
 
         self.bullet_sprites.draw(self.screen)
         self.bullet_sprites.update()
@@ -213,15 +241,15 @@ class Inventory(Player):
     def __init__(self, player_hitpoints, armor_value, screen):
         self.screen = screen
         self.player_hitpoints = player_hitpoints
+        self.hp_bars = pygame.transform.scale(pygame.image.load("./graphics/UI/health_bar.png"), (333, 45))
+        self.hp_bars_bg = pygame.Surface((333, 45))
+        self.hp_bars_bg.fill((64, 64, 64))
         self.armor_value = armor_value
-        self.player_items = [Apple(), Gun("rifle"), None, None, None, None]
+        self.player_items = [Apple(), Gun("shotgun"), Gun("rifle"), Gun("pistol"), Gun("sniper"), Gun("shotgun")]
         # hopefully the inventory won't keep resetting
-        self.inventory_sprite = pygame.transform.scale(
-            pygame.image.load("./graphics/sprites/item_sprites/inventory_back.png"), (80, 80))
-        # BIG CHANGE: CHANGE INVENTORY STATE TO CLEAR ITEMS.
-        # ALSO MAKE THIS A LIST OF CLASSES (BASED ON ITEM), AND TO GET THE INFORMATION FOR THEM, USE A STR FUNCTION
+        self.inventory_sprite = pygame.transform.scale(pygame.image.load("./graphics/sprites/item_sprites/inventory_back.png"),(80,80))
+        # BIG CHANGE: CHANGE INVENTORY STATE TO CLEAR ITEMS. ALSO MAKE THIS A LIST OF CLASSES (BASED ON ITEM), AND TO GET THE INFORMATION FOR THEM, USE A STR FUNCTION
         self.weapon = None
-
     def add_inventory_item(self, item):
         for inventory_slot in self.player_items:
             if self.player_items[inventory_slot] is None:
@@ -232,8 +260,7 @@ class Inventory(Player):
         self.player_items[item_pos] = None
 
     def use_inventory_item(self, item_pos, item_type):
-        # item_type should be a 2 item list with the firt one being the general type,
-        # and the second being specific value
+        # item_type should be a 2 item list with the firt one being the general type, and the second being specific value
         if item_type[0] == "heal":
             self.player_hitpoints += item_type[1]
             if self.player_hitpoints > 100:
@@ -248,40 +275,61 @@ class Inventory(Player):
         elif item_type[0] == "gun":
             # craate gun class now
             # should not remove inventory
-            self.weapon = Gun(item_type[1])
+            self.weapon = self.player_items[item_pos]
 
         else:
 
-            # you can't equip a gun if you've already hovered over it
+            # you can't equip a gun if youve already ohvered over it
             # actually we can just blit the thing onto the inventory
             pass
             # play sound effect error sound maybe
-
     def unequip_gun(self):
         self.weapon = None
-
-    def render_player_items(self, screen):
+    def render_player_items(self, player_hitbox):
         inventory_slot_width = 50
         inventory_slot_height = 50
         inventory_margin = 10
         inventory_x = 150
         for i in range(6):
             inventory_x += 95
-            screen.blit(self.inventory_sprite, (inventory_x, 600))
+            self.screen.blit(self.inventory_sprite, (inventory_x, 600))
         inventory_x = 253
         for item in self.player_items:
             if item is not None:
+
                 # last list should just be a sublist of all the sprites
-                # THIS SHOULD BE THE SYSTEM (FIX USE INVENTORY ITEMS TOO)
-                # (item type, value of HP/consumable, sublist of all the sprites that are associated)
+                # THIS SHOULD BE THE SYSTEM (FIX USE INVENTORY ITEMS TOO) (item type, value of HP/consumable,(sublist of all the sprites that are associated))
                 inventory_image = pygame.image.load(item.get_item_info()[2][1])
-                screen.blit(inventory_image, (inventory_x, 607))
+                self.screen.blit(inventory_image, (inventory_x,607))
             inventory_x += 95
         # now we render the gun
         if self.weapon is not None:
-            self.weapon.display_gun(self.screen)
+            self.weapon.display_gun(self.screen, player_hitbox)
             # change image here?
-        # now we render the HP bars and everything
+        # now we render the HP bars and everything]
+        # calculate armor and HP bar
+
+        # Calculate the length of the health and armor bars based on player's hit points
+        health_length = int((self.player_hitpoints / 100) * 333)
+        armor_length = int((self.armor_value / 100) * 333)
+
+
+        # Create the health value and armor bar based on the calculated lengths
+        if health_length > 0:
+            health_value_bar = pygame.Surface((health_length, 22))
+        else:
+            health_value_bar = pygame.Surface((0, 22))
+        health_value_bar.fill((0, 255, 0))  # Green color
+
+        armor_value_bar = pygame.Surface((armor_length, 22))
+        armor_value_bar.fill((70, 130, 180))  # Cyan color
+
+        # Render the health and armor bars on the screen
+
+        self.screen.blit(self.hp_bars_bg,(356,550))
+        self.screen.blit(health_value_bar, (356, 550))
+        self.screen.blit(armor_value_bar, (356, 550 + 22))
+        self.screen.blit(self.hp_bars, (356, 550))
 
 
 # honestly this is kind of redundant
@@ -428,7 +476,7 @@ class Gun(Item):
                 "gun_idle": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
                 "gun_firing": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
                 "gun_reloading": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/sniper_inventory.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
                 "bullet_capacity": 5,
                 "bullet_damage": 150,
                 "reload_time": 180
@@ -443,10 +491,10 @@ class Gun(Item):
                 "reload_time": 180
             },
             "pistol": {
-                "gun_idle": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
-                "gun_firing": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
-                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/pistol_inventory.png",
+                "gun_idle": "./graphics/sprites/gun_sprites/PNG/pistol.png",
+                "gun_firing": "./graphics/sprites/gun_sprites/PNG/pistol.png",
+                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/pistol.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/pistol.png",
                 "bullet_capacity": 15,
                 "bullet_damage": 15,
                 "reload_time": 120
@@ -455,7 +503,7 @@ class Gun(Item):
                 "gun_idle": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
                 "gun_firing": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
                 "gun_reloading": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/shotgun_inventory.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
                 "bullet_capacity": 6,
                 "bullet_damage": 25,
                 "reload_time": 300
@@ -486,15 +534,38 @@ class Gun(Item):
         screen.blit(forward_slash, (67, 590))
         screen.blit(self.bullet_capacity_text, (75, 590))
 
-    def shoot(self, screen, mouse_position, bullet_sprite_group, obstacle_sprites):
+    def shoot(self, screen, mouse_position, bullet_sprite_group, obstacle_sprites, player_pos):
         if self.bullet_capacity > 0:
+            channel2 = pygame.mixer.Channel(1)
+            channel2.play(self.gun_firing_sound)
             self.bullet_capacity -= 1
+
             gun_firing_png = pygame.image.load(self.gun_firing)
-            screen.blit(gun_firing_png, (555, 364))
+            screen.blit(gun_firing_png,(player_pos[0]+50,player_pos[1]+15))
             print("hi")
-            bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen)
-            bullet_sprite_group.add(bullet)
-            bullet.update()
+            if self.gun_type == "shotgun":
+                for i in range(3):
+                    if i == 0:  # Deviated bullets for spread effect
+                        deviation = 75
+                          # Deviation for y-component
+                        bullet_direction = pygame.Vector2(mouse_position[0] - player_pos[0] + deviation,
+                                                          mouse_position[1] - player_pos[1] + deviation)
+                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, bullet_direction, player_pos, self.bullet_damage)
+                    elif i == 2:
+                        deviation = 45  # Deviation for x-component
+                        # Deviation for y-component
+                        bullet_direction = pygame.Vector2(mouse_position[0] - player_pos[0] - deviation,
+                                                          mouse_position[1] - player_pos[1] - deviation)
+                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, bullet_direction, player_pos, self.bullet_damage)
+                    else:  # Center bullet, no deviation
+                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None, player_pos, self.bullet_damage)
+                    bullet_sprite_group.add(bullet)
+                    bullet.update()
+            else:
+                bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None, player_pos, self.bullet_damage)
+                bullet_sprite_group.add(bullet)
+                bullet.update()
+
 
         # make group of bullet sprites here
         # bullet.go(vector_direction)
@@ -512,15 +583,20 @@ class Gun(Item):
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, mouse_position, gun_image, obstacle_sprites, screen):
+    def __init__(self, mouse_position, gun_image, obstacle_sprites, screen, custom_direction, hitbox, damage):
         super().__init__()
+        self.bullet_damage = damage
         self.screen = screen
         self.obstacle_sprites = obstacle_sprites
         self.image = pygame.Surface([12, 6])
         self.image.fill((255, 204, 0))
         self.rect = self.image.get_rect()
-        self.rect.center = (560 + gun_image.get_width(), 368)
-        direction = pygame.math.Vector2(mouse_position[0] - 560, mouse_position[1] - 350)
+        self.hitbox = hitbox
+        self.rect.center = (self.hitbox.x + gun_image.get_width() + 50, self.hitbox.y + 28)
+        if custom_direction is None:
+            direction = pygame.math.Vector2(mouse_position[0] - self.hitbox.x, mouse_position[1] - self.hitbox.y)
+        else:
+            direction = custom_direction
         self.direction = direction.normalize()  # Normalize the direction vector
 
     def update(self):
@@ -529,13 +605,22 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.x += self.direction.x * speed
         self.rect.y += self.direction.y * speed
 
-        if (
-                self.rect.centerx < 0
-                or self.rect.centerx > 1080
-                or self.rect.centery < 0
-                or self.rect.centery > 720
-        ):
+        if self.rect.centerx < 0 or self.rect.centerx > 1080 or self.rect.centery < 0 or self.rect.centery > 720:
             self.kill()
     # Additional code goes here
-    # self.collisions()
-    # how
+
+    #self.collisions()
+        # how
+
+
+    #outline: this code should basically calculate the direction it must go, then move towards that direction at a certain speed (depends on the gun)
+    #and also then when it collides (or it goes past a certain limit (maybe longest diagonal from the center to corner of screen)) it should end itself
+    #then we need to blit the bullets to the screen
+    #there should also be a group to go with this
+
+
+    # fix the issue with adding the bullet to the bullet_sprites sprite group (probably right after yu instantiate the class)
+    # then just fix how the bulltes move
+    # then add reloading sfx
+    # also make sure to remove bullets after a certain point
+    # also make sure theyre bliting right

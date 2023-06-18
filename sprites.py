@@ -1,6 +1,7 @@
 import os
 import player
 import pygame
+import bot
 from pytmx.util_pygame import load_pygame
 
 from settings import *
@@ -49,9 +50,15 @@ class Sprites:
         self.player = None
         self.screen = screen
 
+        # Cursor
+        self.cursor_image = pygame.image.load('./graphics/UI/crosshair.png')
+        self.cursor_image = pygame.transform.scale(self.cursor_image, (50, 50))
+
         # Sprite Groups
         self.sprite_group = CameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
+        self.bot_group = pygame.sprite.Group()
+        self.bullet_sprites = pygame.sprite.Group()
 
         # set up sprites and create map
         self.setup()
@@ -97,7 +104,8 @@ class Sprites:
     def run(self, dt):
         self.screen.fill('black')
         self.sprite_group.custom_draw(self.player)
-        self.sprite_group.update(dt)
+        self.screen.blit(self.cursor_image, player.Player.print_crosshair(self.screen))
+        self.sprite_group.update(dt, self.bullet_sprites, self.player.hitbox, self.bot_group)
 
     def update(self):
         self.sprite_group.draw(self.screen)

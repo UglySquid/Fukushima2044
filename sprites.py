@@ -8,35 +8,26 @@ from settings import *
 os.chdir(os.getcwd())
 
 
-def draw_rect_outline(surface, screen, rect, color, width=1):
-    x, y, w, h = rect
-    width = max(width, 1)  # Draw at least one rect.
-    width = min(min(width, w//2), h//2)  # Don't overdraw.
-
-    # This draws several smaller outlines inside the first outline. Invert
-    # the direction if it should grow outwards.
-    for i in range(width):
-        pygame.gfxdraw.rect(screen, (x+i, y+i, w-i*2, h-i*2), color)
-
-
 class Tile(pygame.sprite.Sprite):
     def __init__(self, position, surface, groups, z=LAYERS['main']):
         super().__init__(groups)
         self.image = surface
         self.rect = self.image.get_rect(topleft=position)
         self.z = z
-        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.8, -self.rect.height*0.8)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.4, -self.rect.height*0.4)
 
 
 class Trees(Tile):
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.01, -self.rect.height * 0.01)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.4, -self.rect.height * 0.7)
+        self.hitbox.bottom = self.rect.bottom-50
 
 
 class City(Tile):
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.2)
 
 
 class Fence(Tile):
@@ -47,6 +38,7 @@ class Fence(Tile):
 class Chest(Tile):
     def __init__(self, position, surface, groups):
         super().__init__(position, surface, groups)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
 
 
 class Sprites:

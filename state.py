@@ -112,21 +112,21 @@ class PauseMenu(State):
     def __init__(self, game):
         self.game = game
 
-        pygame.mixer.init()
-        pygame.mixer.music.load("audio/title_bg.mp3")
-        pygame.mixer.music.play(loops=-1)
+        # pygame.mixer.init()
+        # pygame.mixer.music.load("audio/title_bg.mp3")
+        # pygame.mixer.music.play(loops=-1)
 
         self.screen = self.game.screen
         State.__init__(self, game)
 
         # Resume game / exit menu Button
-        self.resume_btn = Button(self.screen, "RESUME", [self.screen.get_width()/2, self.screen.get_height()/2-50])
+        self.resume_btn = Button(self.screen, "RESUME", [150, self.screen.get_height()/2-50])
 
         # Return to main menu button
-        self.title_btn = Button(self.screen, "TITLE", [self.screen.get_width()/2, self.screen.get_height()/2+50])
+        self.title_btn = Button(self.screen, "TITLE", [150, self.screen.get_height()/2+50])
 
         # Quit Menu Button
-        self.quit_btn = Button(self.screen, "QUIT", [self.screen.get_width()/2, self.screen.get_height()/2+150])
+        self.quit_btn = Button(self.screen, "QUIT", [150, self.screen.get_height()/2+150])
 
     def update(self, delta_time, actions):
         if actions["Title"]:
@@ -176,6 +176,7 @@ class Level1(State):
         if actions["Pause"]:
             new_state = PauseMenu(self.game)
             new_state.enter_state()
+
         self.sprites.update()
 
         dt = self.clock.tick() / 1000
@@ -189,11 +190,16 @@ class Level1(State):
         menu_btn.draw()
 
         self.sprites.player.inventory.render_player_items(self.screen)
-        self.screen.blit(self.cursor_image, player.Player.print_crosshair(self.screen))
+
+        if self.game.state_stack[0] == "Pause":
+            self.screen.blit(self.cursor_image, player.Player.print_crosshair(screen))
 
         # Events (Check button presses)
         if menu_btn.press():
             self.game.actions["Pause"] = True
+
+    def render_cursor(self, screen):
+        self.screen.blit(self.cursor_image, player.Player.print_crosshair(screen))
 
 
 class Level2(State):

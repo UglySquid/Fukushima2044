@@ -28,7 +28,8 @@ class Player(pygame.sprite.Sprite):
         self.screen = screen
 
         # Sounds
-        self.pain_sounds = [pygame.mixer.Sound("./audio/pain_sound.wav"), pygame.mixer.Sound("audio\\pain_sound_2.wav"),
+        self.pain_sounds = [pygame.mixer.Sound("./audio/pain_sound.wav"),
+                            pygame.mixer.Sound("./audio/pain_sound_2.wav"),
                             pygame.mixer.Sound("./audio/pain_sound_3.wav")]
         self.death_sounds = [pygame.mixer.Sound("./audio/death_sound.wav"),
                              pygame.mixer.Sound("./audio/death_sound_2.wav"),
@@ -208,7 +209,7 @@ class Player(pygame.sprite.Sprite):
             channel6.play(self.death_sounds[random.randint(0, 2)])
             self.kill()
         self.screen.blit(self.my_hitbox_visualizer, self.hitbox.topleft)
-        self.keyboard_input(bullet_sprites)
+        self.keyboard_input()
 
         if self.inventory.weapon and self.reload_pressed is not None:
             if self.inventory.weapon.bullet_capacity != self.inventory.weapon.max_bullet_capacity:

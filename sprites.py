@@ -29,8 +29,7 @@ class Tile(pygame.sprite.Sprite):
 class Trees(Tile):
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.9, -self.rect.height * 0.6)
-        self.hitbox.bottom = self.rect.bottom-50
+        self.hitbox = self.rect.copy().inflate(-self.rect.width*1, -self.rect.height*1)
 
 
 class City(Tile):
@@ -88,9 +87,9 @@ class Sprites:
         # TILE LAYERS
 
         # Map borders made with stone walls
-        for x, y, surf in tmx_data.get_layer_by_name("Borders").tiles():
-            pos = (x * 32, y * 32)
-            Tile(position=pos, surface=surf, groups=[self.sprite_group, self.obstacle_sprites], z=LAYERS['Borders'])
+        # for x, y, surf in tmx_data.get_layer_by_name("Borders").tiles():
+        #     pos = (x * 32, y * 32)
+        #     Tile(position=pos, surface=surf, groups=[self.sprite_group, self.obstacle_sprites], z=LAYERS['Borders'])
 
         # Facility
         for layer in ["Facility", "Facility Deco", "Facility Deco 2"]:

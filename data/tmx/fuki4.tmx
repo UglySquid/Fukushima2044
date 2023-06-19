@@ -971,7 +971,6 @@
   <object id="279" gid="3350" x="-16" y="3118" width="131" height="175"/>
   <object id="280" gid="3350" x="10" y="2897" width="131" height="175"/>
   <object id="282" gid="3350" x="241" y="3112" width="131" height="175"/>
-  <object id="980" gid="3364" x="1808" y="848" width="200" height="100" rotation="20.6367"/>
  </objectgroup>
  <objectgroup id="25" name="Chests" locked="1">
   <object id="949" gid="3362" x="478" y="1512.91" width="45" height="43"/>

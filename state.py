@@ -222,7 +222,7 @@ class Level1(State):
         self.sprites.update()
 
         dt = self.clock.tick() / 1000
-        self.sprites.run(dt)
+        self.sprites.run(dt, actions)
         self.game.reset_keys()
 
     def render(self, screen):
@@ -230,8 +230,6 @@ class Level1(State):
         menu_btn.button = pygame.transform.scale(menu_btn.button, (menu_btn.button.get_width()*0.7, menu_btn.button.get_height()*0.7))
         menu_btn.button_rect = menu_btn.button.get_rect()
         menu_btn.draw()
-
-        self.sprites.player.inventory.render_player_items(self.screen)
 
         if self.game.state_stack[0] == "Pause":
             self.screen.blit(self.cursor_image, player.Player.print_crosshair(screen))

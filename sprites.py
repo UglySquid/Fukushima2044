@@ -143,12 +143,12 @@ class Sprites:
         #         else:
         #             pass
 
-    def run(self, dt):
+    def run(self, dt, actions):
         self.screen.fill('black')
         self.sprite_group.custom_draw(self.player)
         self.chest_click()
         # self.screen.blit(self.cursor_image, player.Player.print_crosshair(self.screen))
-        self.sprite_group.update(dt, self.bullet_sprites, self.player.hitbox, self.bot_group)
+        self.sprite_group.update(dt, self.bullet_sprites, self.player.hitbox, self.bot_group, actions)
         if self.player.get_hitpoints() <= 0:
             self.player.dead = True
 

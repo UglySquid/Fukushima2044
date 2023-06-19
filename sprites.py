@@ -74,6 +74,8 @@ class Sprites:
         self.sprite_group = CameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
         self.bot_group = pygame.sprite.Group()
+        self.chest_group = pygame.sprite.Group()
+        self.floor_items = pygame.sprite.Group()
         self.bullet_sprites = pygame.sprite.Group()
 
         # set up sprites and create map

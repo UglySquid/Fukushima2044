@@ -148,7 +148,7 @@ class Player(pygame.sprite.Sprite):
             # Mouse cursor is not over the inventory area
             if self.inventory.weapon is not None and (not (245 <= mouse_pos[0] <= 720 and 600 <= mouse_pos[1] <= 695)):
                 if self.mouse_clicked is False:
-                    self.inventory.weapon.shoot(self.screen, mouse_pos, self.bullet_sprites, self.obstacle_sprites)
+                    self.inventory.weapon.shoot(self.screen, mouse_pos, self.bullet_sprites, self.obstacle_sprites, self.rect)
             # for if you click menu button
             if True:
                 pass
@@ -253,7 +253,7 @@ class Inventory(Player):
         self.hp_bars_bg.fill((64, 64, 64))
         self.armor_value = armor_value
         # Gun("pistol")
-        self.player_items = [Apple(), Gun("shotgun"), Gun("rifle"), Gun("sniper"), Gun("shotgun")]
+        self.player_items = [Apple(), Gun("shotgun"), Gun("rifle"), Gun("sniper"), Gun("shotgun"), Gun("pistol")]
         # hopefully the inventory won't keep resetting
         self.inventory_sprite = pygame.transform.scale(pygame.image.load("./graphics/sprites/item_sprites/inventory_back.png"),(80,80))
         # BIG CHANGE: CHANGE INVENTORY STATE TO CLEAR ITEMS. ALSO MAKE THIS A LIST OF CLASSES (BASED ON ITEM), AND TO GET THE INFORMATION FOR THEM, USE A STR FUNCTION
@@ -316,9 +316,9 @@ class Inventory(Player):
             inventory_x += 95
         # now we render the gun
         if self.weapon is not None:
-            self.weapon.display_gun(self.screen, player_hitbox)
+            self.weapon.display_gun(self.screen)
             # change image here?
-        # now we render the HP bars and everything]
+        # now we render the HP bars and everything
         # calculate armor and HP bar
 
         # Calculate the length of the health and armor bars based on player's hit points
@@ -482,12 +482,13 @@ class Gun(Item):
     def __init__(self, gun_type):
         self.item_type = "gun"
         self.gun_type = gun_type
+        self.gun_firing_sound = pygame.mixer.Sound("./audio/gun_firing.mp3")
         gun_types = {
             "sniper": {
                 "gun_idle": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
                 "gun_firing": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
                 "gun_reloading": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/sniper_inventory.png",
                 "bullet_capacity": 5,
                 "bullet_damage": 150,
                 "reload_time": 180
@@ -496,16 +497,16 @@ class Gun(Item):
                 "gun_idle": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
                 "gun_firing": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
                 "gun_reloading": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/assault_rifle_inventory.png",
                 "bullet_capacity": 30,
                 "bullet_damage": 28,
                 "reload_time": 180
             },
             "pistol": {
-                "gun_idle": "./graphics/sprites/gun_sprites/PNG/pistol.png",
-                "gun_firing": "./graphics/sprites/gun_sprites/PNG/pistol.png",
-                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/pistol.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/pistol.png",
+                "gun_idle": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
+                "gun_firing": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
+                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/pistol_inventory.png",
                 "bullet_capacity": 15,
                 "bullet_damage": 15,
                 "reload_time": 120
@@ -514,7 +515,7 @@ class Gun(Item):
                 "gun_idle": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
                 "gun_firing": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
                 "gun_reloading": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/shotgun_inventory.png",
                 "bullet_capacity": 6,
                 "bullet_damage": 25,
                 "reload_time": 300
@@ -552,7 +553,7 @@ class Gun(Item):
             self.bullet_capacity -= 1
 
             gun_firing_png = pygame.image.load(self.gun_firing)
-            screen.blit(gun_firing_png,(player_pos[0]+50,player_pos[1]+15))
+            screen.blit(gun_firing_png, (player_pos[0]+50, player_pos[1]+15))
             print("hi")
             if self.gun_type == "shotgun":
                 for i in range(3):

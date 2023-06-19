@@ -10,6 +10,8 @@ from settings import *
 
 os.chdir(os.getcwd())
 
+apple_pos = [(30, 30)]
+
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, position, surface, groups, z=LAYERS['main']):
@@ -17,31 +19,48 @@ class Tile(pygame.sprite.Sprite):
         self.image = surface
         self.rect = self.image.get_rect(topleft=position)
         self.z = z
-        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.6, -self.rect.height*0.4)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.7, -self.rect.height*0.7)
+        self.name = "object"
+
+    def get_name(self):
+        return self.name
 
 
 class Trees(Tile):
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.9, -self.rect.height * 0.6)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width*1, -self.rect.heightw*1)
         self.hitbox.bottom = self.rect.bottom-50
 
 
 class City(Tile):
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.2)
-
-
-class Fence(Tile):
-    def __init__(self, position, surface, groups):
-        super().__init__(position, surface, groups)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.5, -self.rect.height * 0.5)
 
 
 class Chest(Tile):
     def __init__(self, position, surface, groups):
         super().__init__(position, surface, groups)
         self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
+        self.name = "chest"
+
+        self.apples_surf = pygame.image.load("./graphics/sprites/item_sprites/apple.png")
+        self.apple_pos = self.rect
+        self.apple_sprites = pygame.sprite.Group()
+
+    # def open(self):
+    #     self.image = pygame.image.load("./graphics/chests/chest_open.png")
+    #     self.create_apple()
+    #
+    # def create_apple(self):
+    #     Tile(pos=apple_pos,
+    #          surface=self.apples_surf,
+    #          groups=[self.apple_sprites, self.groups()[0]],
+    #          z=LAYERS['apple'])
+    #
+    # def get_name(self):
+    #     return self.name
 
 
 class Sprites:
@@ -51,10 +70,6 @@ class Sprites:
         # Get the screen sprites will be displayed on
         self.player = None
         self.screen = screen
-
-        # Cursor
-        # self.cursor_image = pygame.image.load('./graphics/UI/crosshair.png')
-        # self.cursor_image = pygame.transform.scale(self.cursor_image, (50, 50))
 
         # Sprite Groups
         self.sprite_group = CameraGroup()
@@ -67,13 +82,15 @@ class Sprites:
 
     def setup(self):
         # Initialize tmx data
+        self.screen.fill((114, 117, 27))
         tmx_data = load_pygame('./data/tmx/fuki4.tmx')
 
         # TILE LAYERS
+
         # Map borders made with stone walls
-        for x, y, surf in tmx_data.get_layer_by_name("Borders").tiles():
-            pos = (x * 32, y * 32)
-            Tile(position=pos, surface=surf, groups=[self.sprite_group, self.obstacle_sprites], z=LAYERS['Borders'])
+        # for x, y, surf in tmx_data.get_layer_by_name("Borders").tiles():
+        #     pos = (x * 32, y * 32)
+        #     Tile(position=pos, surface=surf, groups=[self.sprite_group, self.obstacle_sprites], z=LAYERS['Borders'])
 
         # Facility
         for layer in ["Facility", "Facility Deco", "Facility Deco 2"]:
@@ -95,7 +112,7 @@ class Sprites:
         for obj in tmx_data.get_layer_by_name('Chests'):
             Chest((obj.x, obj.y), obj.image, [self.sprite_group, self.obstacle_sprites])
 
-        self.player = player.Player((1600, 1600), self.sprite_group, self.obstacle_sprites, self.screen)
+        self.player = player.Player((200, 200), self.sprite_group, self.obstacle_sprites, self.screen)
         Tile(
             position=(0, 0),
             surface=pygame.image.load('./graphics/map_bg.png'),
@@ -103,17 +120,33 @@ class Sprites:
             z=LAYERS['Ground']
         )
 
-        guard = bot.Bot((1700, 1700),
-                                   [self.sprite_group, self.bot_group],
-                                   self.obstacle_sprites,
-                                   self.screen,
-                                   z=LAYERS["main"])
+        for guard in range(3):
+            guard = bot.Bot((1600, 1600),
+                                       [self.sprite_group, self.bot_group],
+                                       self.obstacle_sprites,
+                                       self.screen,
+                                       z=LAYERS["main"])
 
-        self.bot_group.add(guard)
+            self.bot_group.add(guard)
+
+    def chest_click(self):
+        for sprite in self.sprite_group:
+            if pygame.mouse.get_pressed()[0] and pygame.mouse.get_pos() == sprite.image.get_rect():
+                if sprite.get_name == "chest":
+                    sprite.open()
+                else:
+                    pass
+        # if pygame.mouse.get_pressed()[0]:
+        #     for sprite in self.sprite_group:
+        #         if sprite.get_name == "chest":
+        #             sprite.open()
+        #         else:
+        #             pass
 
     def run(self, dt):
         self.screen.fill('black')
         self.sprite_group.custom_draw(self.player)
+        self.chest_click()
         # self.screen.blit(self.cursor_image, player.Player.print_crosshair(self.screen))
         self.sprite_group.update(dt, self.bullet_sprites, self.player.hitbox, self.bot_group)
         if self.player.get_hitpoints() <= 0:
@@ -121,6 +154,8 @@ class Sprites:
 
     def update(self):
         self.sprite_group.draw(self.screen)
+        self.bullet_sprites.draw(self.screen)
+        self.bullet_sprites.update()
 
 
 class CameraGroup(pygame.sprite.Group):

@@ -29,7 +29,7 @@ class Tile(pygame.sprite.Sprite):
 class Trees(Tile):
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width*1, -self.rect.heightw*1)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width*1, -self.rect.height*1)
         self.hitbox.bottom = self.rect.bottom-50
 
 
@@ -87,7 +87,7 @@ class Sprites:
 
         # TILE LAYERS
 
-        # Map borders made with stone walls
+        # # Map borders made with stone walls
         # for x, y, surf in tmx_data.get_layer_by_name("Borders").tiles():
         #     pos = (x * 32, y * 32)
         #     Tile(position=pos, surface=surf, groups=[self.sprite_group, self.obstacle_sprites], z=LAYERS['Borders'])

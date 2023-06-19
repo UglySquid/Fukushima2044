@@ -24,6 +24,10 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, position, sprite_group, obstacle_sprites, screen):
         super().__init__(sprite_group)
 
+        # alive or dead
+        self.mouse_clicked = False
+        self.dead = False
+
         # Create screen
         self.screen = screen
 
@@ -121,7 +125,7 @@ class Player(pygame.sprite.Sprite):
             self.direction.y = 0
 
         if keys[pygame.K_TAB]:
-            pass
+            self.inventory.add_inventory_item(Apple())
         if keys[pygame.K_1]:
             pass
         if pygame.mouse.get_pressed()[0]:
@@ -135,8 +139,7 @@ class Player(pygame.sprite.Sprite):
                     if mouse_pos[1] in range(600, 695):
                         if self.inventory.player_items[i] is not None and not self.mouse_clicked:
                             # print('hi')
-                            if self.inventory.player_items[i].get_item_info()[
-                                0] == "gun" and self.inventory.weapon is not None:
+                            if self.inventory.player_items[i].get_item_info()[0] == "gun" and self.inventory.weapon is not None:
                                 self.inventory.weapon = None
                                 print("STOP DISPLAYING GUN")
                                 continue
@@ -184,6 +187,9 @@ class Player(pygame.sprite.Sprite):
         # when player is not moving
         if (self.direction.magnitude() == 0) and ('attack' not in self.status):
             self.status = self.status.split('_')[0] + '_idle'
+
+    def get_hitpoints(self):
+        return self.player_hitpoints
 
     def move(self, dt):
         # Make sure vector direction is always 1
@@ -246,11 +252,13 @@ class Inventory(Player):
         self.hp_bars_bg = pygame.Surface((333, 45))
         self.hp_bars_bg.fill((64, 64, 64))
         self.armor_value = armor_value
-        self.player_items = [Apple(), Gun("shotgun"), Gun("rifle"), Gun("pistol"), Gun("sniper"), Gun("shotgun")]
+        # Gun("pistol")
+        self.player_items = [Apple(), Gun("shotgun"), Gun("rifle"), Gun("sniper"), Gun("shotgun")]
         # hopefully the inventory won't keep resetting
         self.inventory_sprite = pygame.transform.scale(pygame.image.load("./graphics/sprites/item_sprites/inventory_back.png"),(80,80))
         # BIG CHANGE: CHANGE INVENTORY STATE TO CLEAR ITEMS. ALSO MAKE THIS A LIST OF CLASSES (BASED ON ITEM), AND TO GET THE INFORMATION FOR THEM, USE A STR FUNCTION
         self.weapon = None
+
     def add_inventory_item(self, item):
         for inventory_slot in self.player_items:
             if self.player_items[inventory_slot] is None:
@@ -280,12 +288,14 @@ class Inventory(Player):
 
         else:
 
-            # you can't equip a gun if youve already ohvered over it
+            # you can't equip a gun if you've already hovered over it
             # actually we can just blit the thing onto the inventory
             pass
             # play sound effect error sound maybe
+
     def unequip_gun(self):
         self.weapon = None
+
     def render_player_items(self, player_hitbox):
         inventory_slot_width = 50
         inventory_slot_height = 50
@@ -299,7 +309,8 @@ class Inventory(Player):
             if item is not None:
 
                 # last list should just be a sublist of all the sprites
-                # THIS SHOULD BE THE SYSTEM (FIX USE INVENTORY ITEMS TOO) (item type, value of HP/consumable,(sublist of all the sprites that are associated))
+                # THIS SHOULD BE THE SYSTEM (FIX USE INVENTORY ITEMS TOO) (item type, value of HP/consumable,
+                # (sublist of all the sprites that are associated))
                 inventory_image = pygame.image.load(item.get_item_info()[2][1])
                 self.screen.blit(inventory_image, (inventory_x,607))
             inventory_x += 95
@@ -314,7 +325,6 @@ class Inventory(Player):
         health_length = int((self.player_hitpoints / 100) * 333)
         armor_length = int((self.armor_value / 100) * 333)
 
-
         # Create the health value and armor bar based on the calculated lengths
         if health_length > 0:
             health_value_bar = pygame.Surface((health_length, 22))
@@ -327,10 +337,10 @@ class Inventory(Player):
 
         # Render the health and armor bars on the screen
 
-        self.screen.blit(self.hp_bars_bg,(356,550))
-        self.screen.blit(health_value_bar, (356, 550))
-        self.screen.blit(armor_value_bar, (356, 550 + 22))
-        self.screen.blit(self.hp_bars, (356, 550))
+        self.screen.blit(self.hp_bars_bg,(356, 30))
+        self.screen.blit(health_value_bar, (356, 30))
+        self.screen.blit(armor_value_bar, (356, 30 + 22))
+        self.screen.blit(self.hp_bars, (356, 30))
 
 
 # honestly this is kind of redundant

@@ -1,4 +1,6 @@
 import os
+import random
+
 import player
 import pygame
 import bot
@@ -15,13 +17,13 @@ class Tile(pygame.sprite.Sprite):
         self.image = surface
         self.rect = self.image.get_rect(topleft=position)
         self.z = z
-        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.4, -self.rect.height*0.4)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.6, -self.rect.height*0.4)
 
 
 class Trees(Tile):
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.4, -self.rect.height * 0.7)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.9, -self.rect.height * 0.6)
         self.hitbox.bottom = self.rect.bottom-50
 
 
@@ -51,8 +53,8 @@ class Sprites:
         self.screen = screen
 
         # Cursor
-        self.cursor_image = pygame.image.load('./graphics/UI/crosshair.png')
-        self.cursor_image = pygame.transform.scale(self.cursor_image, (50, 50))
+        # self.cursor_image = pygame.image.load('./graphics/UI/crosshair.png')
+        # self.cursor_image = pygame.transform.scale(self.cursor_image, (50, 50))
 
         # Sprite Groups
         self.sprite_group = CameraGroup()
@@ -71,7 +73,7 @@ class Sprites:
         # Map borders made with stone walls
         for x, y, surf in tmx_data.get_layer_by_name("Borders").tiles():
             pos = (x * 32, y * 32)
-            Tile(position=pos, surface=surf, groups=[self.sprite_group], z=LAYERS['Borders'])
+            Tile(position=pos, surface=surf, groups=[self.sprite_group, self.obstacle_sprites], z=LAYERS['Borders'])
 
         # Facility
         for layer in ["Facility", "Facility Deco", "Facility Deco 2"]:
@@ -101,11 +103,21 @@ class Sprites:
             z=LAYERS['Ground']
         )
 
+        guard = bot.Bot((1700, 1700),
+                                   [self.sprite_group, self.bot_group],
+                                   self.obstacle_sprites,
+                                   self.screen,
+                                   z=LAYERS["main"])
+
+        self.bot_group.add(guard)
+
     def run(self, dt):
         self.screen.fill('black')
         self.sprite_group.custom_draw(self.player)
-        self.screen.blit(self.cursor_image, player.Player.print_crosshair(self.screen))
+        # self.screen.blit(self.cursor_image, player.Player.print_crosshair(self.screen))
         self.sprite_group.update(dt, self.bullet_sprites, self.player.hitbox, self.bot_group)
+        if self.player.get_hitpoints() <= 0:
+            self.player.dead = True
 
     def update(self):
         self.sprite_group.draw(self.screen)

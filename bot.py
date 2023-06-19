@@ -1,16 +1,16 @@
 import pygame
-import map
+from settings import LAYERS
 import random
 import sprites
 
 class Bot(pygame.sprite.Sprite):
     # we put this here so the inventory doesn't need to call superclass init method, therefore the parameters for init
-    # arent messed up
+    # aren't messed up
 
-    def __init__(self, position, sprite_group, obstacle_sprites, screen):
+    def __init__(self, position, sprite_group, obstacle_sprites, screen, z):
         super().__init__(sprite_group)
-        self.engage_sounds = [pygame.mixer.Sound("audio\\Enemy_Contact.mp3"),
-                              pygame.mixer.Sound("audio\\Enemy_Contact_2.mp3")]
+        self.engage_sounds = [pygame.mixer.Sound("./audio/Enemy_Contact.mp3"),
+                              pygame.mixer.Sound("./audio/Enemy_Contact_2.mp3")]
         self.already_said_enemy_contact = False
         self.return_fire = False
         self.return_fire_counter = 0
@@ -21,17 +21,17 @@ class Bot(pygame.sprite.Sprite):
         self.player_hitpoints = 100
         self.armor_value = 0
         self.inventory = Inventory(self.player_hitpoints, self.armor_value)
-        self.sprite_right = pygame.image.load("sprites\\player\\right\\right_0.png")
-        self.hit_marker_sound = pygame.mixer.Sound("audio\\hit_marker.mp3")
+        self.sprite_right = pygame.image.load("./graphics/player/right/right_0.png")
+        self.hit_marker_sound = pygame.mixer.Sound("./audio/hit_marker.mp3")
         self.image = self.sprite_right
         self.rect = self.image.get_rect()
         self.x_direction = 0
         self.y_direction = 0
         self.obstacle_sprites = obstacle_sprites
-        self.death_sounds = [pygame.mixer.Sound("audio\\death_sound.wav"),
-                             pygame.mixer.Sound("audio\\death_sound_2.wav"),
-                             pygame.mixer.Sound("audio\\death_sound_3.wav")]
-        self.gun_reloading_sound = pygame.mixer.Sound("audio\\gun_reload.mp3")
+        self.death_sounds = [pygame.mixer.Sound("./audio/death_sound.wav"),
+                             pygame.mixer.Sound("./audio/death_sound_2.wav"),
+                             pygame.mixer.Sound("./audio/death_sound_3.wav")]
+        self.gun_reloading_sound = pygame.mixer.Sound("./audio/gun_reload.mp3")
 
         # new method i found online to change the hitbox so that its smaller
         print(self.rect)
@@ -40,6 +40,7 @@ class Bot(pygame.sprite.Sprite):
         self.reloading_sound_played = None
         self.walking_direction = 0
         self.walking_direction_timer = 0
+        self.z = LAYERS['main']
 
     def move_ai(self):
         if self.inventory.weapon is not None:
@@ -102,7 +103,7 @@ class Bot(pygame.sprite.Sprite):
                     if self.y_direction < 0:
                         self.hitbox.top = sprite.hitbox.bottom
 
-    def update(self, bullet_sprites, player_position, bot_group):
+    def update(self, dt, bullet_sprites, player_position, bot_group):
         if self.return_fire:
             for bot in bot_group:
 
@@ -170,47 +171,48 @@ class Gun(Item):
         self.gun_type = gun_type
         gun_types = {
             "sniper": {
-                "gun_idle": "sprites\\gun_sprites\\PNG\\sniper_rifle_idle.png",
-                "gun_firing": "sprites\\gun_sprites\\PNG\\sniper_rifle_idle.png",
-                "gun_reloading": "sprites\\gun_sprites\\PNG\\sniper_rifle_idle.png",
-                "inventory_image": "prites\\gun_sprites\\PNG\\sniper_inventory.png",
-                "bullet_capacity": 1,
+                "gun_idle": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
+                "gun_firing": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
+                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
+                "bullet_capacity": 5,
                 "bullet_damage": 150,
                 "reload_time": 180
             },
             "rifle": {
-                "gun_idle": "sprites\\gun_sprites\\PNG\\assault_rifle_idle.png",
-                "gun_firing": "sprites\\gun_sprites\\PNG\\assault_rifle_idle.png",
-                "gun_reloading": "sprites\\gun_sprites\\PNG\\assault_rifle_idle.png",
-                "inventory_image": "sprites\\gun_sprites\\PNG\\assault_rifle_inventory.png",
+                "gun_idle": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
+                "gun_firing": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
+                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
                 "bullet_capacity": 30,
                 "bullet_damage": 28,
                 "reload_time": 180
             },
             "pistol": {
-                "gun_idle": "sprites\\gun_sprites\\PNG\\pistol_idle.png",
-                "gun_firing": "sprites\\gun_sprites\\PNG\\pistol_idle.png",
-                "gun_reloading": "sprites\\gun_sprites\\PNG\\pistol_idle.png",
-                "inventory_image": "sprites\\gun_sprites\\PNG\\pistol_inventory.png",
+                "gun_idle": "./graphics/sprites/gun_sprites/PNG/pistol.png",
+                "gun_firing": "./graphics/sprites/gun_sprites/PNG/pistol.png",
+                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/pistol.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/pistol.png",
                 "bullet_capacity": 15,
                 "bullet_damage": 15,
                 "reload_time": 120
             },
             "shotgun": {
-                "gun_idle": "sprites\\gun_sprites\\PNG\\shotgun_idle.png",
-                "gun_firing": "sprites\\gun_sprites\\PNG\\shotgun_idle.png",
-                "gun_reloading": "sprites\\gun_sprites\\PNG\\shotgun_idle.png",
-                "inventory_image": "sprites\\gun_sprites\\PNG\\shotgun_inventory.png",
+                "gun_idle": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
+                "gun_firing": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
+                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
                 "bullet_capacity": 6,
                 "bullet_damage": 25,
                 "reload_time": 300
             }
         }
+
         self.gun_idle = gun_types.get(self.gun_type, {}).get("gun_idle")
         self.gun_firing = gun_types.get(self.gun_type, {}).get("gun_firing")
         self.gun_reloading = gun_types.get(self.gun_type, {}).get("gun_reloading")
         self.gun_inventory = gun_types.get(self.gun_type, {}).get("inventory_image")
-        self.gun_firing_sound = pygame.mixer.Sound("audio\\gun_firing.mp3")
+        self.gun_firing_sound = pygame.mixer.Sound("./audio/gun_firing.mp3")
         # if gun_bullets is not None: self.bullet_capacity = gun_bullets
         self.max_bullet_capacity = self.bullet_capacity = gun_types.get(self.gun_type, {}).get("bullet_capacity")
         self.bullet_damage = gun_types.get(self.gun_type, {}).get("bullet_damage")

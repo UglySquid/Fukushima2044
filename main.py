@@ -31,6 +31,7 @@ class Game:
                         "Level2": False,
                         "Pause": False,
                         "Title": False,
+                        "Game over": False,
                         "return": False}
         self.dt, self.prev_time = 0, 0
 

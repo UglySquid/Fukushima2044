@@ -113,7 +113,7 @@ class Sprites:
         for obj in tmx_data.get_layer_by_name('Chests'):
             Chest((obj.x, obj.y), obj.image, [self.sprite_group, self.obstacle_sprites])
 
-        self.player = player.Player((200, 200), self.sprite_group, self.obstacle_sprites, self.screen)
+        self.player = player.Player((200, 200), self.sprite_group, self.obstacle_sprites, self.bullet_sprites, self.screen)
         Tile(
             position=(0, 0),
             surface=pygame.image.load('./graphics/map_bg.png'),
@@ -121,11 +121,11 @@ class Sprites:
             z=LAYERS['Ground']
         )
 
-        for guard in range(3):
+        for guard in range(1):
             guard = bot.Bot((1600, 1600),
                                        [self.sprite_group, self.bot_group],
                                        self.obstacle_sprites,
-                                       self.screen,
+                                       self.screen, self.bullet_sprites,
                                        z=LAYERS["main"])
 
             self.bot_group.add(guard)

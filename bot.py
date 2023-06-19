@@ -7,8 +7,9 @@ class Bot(pygame.sprite.Sprite):
     # we put this here so the inventory doesn't need to call superclass init method, therefore the parameters for init
     # aren't messed up
 
-    def __init__(self, position, sprite_group, obstacle_sprites, screen, z):
+    def __init__(self, position, sprite_group, obstacle_sprites, screen, bullet_sprites, z):
         super().__init__(sprite_group)
+        self.bullet_sprites = bullet_sprites
         self.engage_sounds = [pygame.mixer.Sound("./audio/Enemy_Contact.mp3"),
                               pygame.mixer.Sound("./audio/Enemy_Contact_2.mp3")]
         self.already_said_enemy_contact = False
@@ -61,8 +62,10 @@ class Bot(pygame.sprite.Sprite):
 
         # code doesnt work since it still constantly plays as the animation is checked every 60 seconds so it needs to work on tick system
 
-    def collisions(self, direction, bullet_sprites, player_position):
-        for sprite in bullet_sprites:
+    def collisions(self, direction):
+        print(self.bullet_sprites.sprites(), "dig")
+        for sprite in self.bullet_sprites.sprites():
+            print(sprite)
             if sprite.rect.colliderect(self.hitbox):
                 print("OCCIOJSDIOFJSDIOFJOIJDIOFSJ")
                 # return fire by the AI
@@ -135,8 +138,8 @@ class Bot(pygame.sprite.Sprite):
         if self.return_fire == False:
             self.hitbox.x += self.x_direction
             self.hitbox.y += self.y_direction
-        self.collisions("horizontal", bullet_sprites, player_position)
-        self.collisions("vertical", bullet_sprites, player_position)
+        self.collisions("horizontal")
+        self.collisions("vertical")
         self.rect.topleft = self.hitbox.topleft  # Update rect position to match hitbox
         self.inventory.weapon.display_gun(self.screen, self.hitbox)
 
@@ -175,8 +178,8 @@ class Gun(Item):
                 "gun_idle": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
                 "gun_firing": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
                 "gun_reloading": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
-                "bullet_capacity": 5,
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/sniper_inventory.png",
+                "bullet_capacity": 1,
                 "bullet_damage": 150,
                 "reload_time": 180
             },
@@ -184,16 +187,16 @@ class Gun(Item):
                 "gun_idle": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
                 "gun_firing": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
                 "gun_reloading": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/assault_rifle_idle.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/assault_rifle_inventory.png",
                 "bullet_capacity": 30,
                 "bullet_damage": 28,
                 "reload_time": 180
             },
             "pistol": {
-                "gun_idle": "./graphics/sprites/gun_sprites/PNG/pistol.png",
-                "gun_firing": "./graphics/sprites/gun_sprites/PNG/pistol.png",
-                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/pistol.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/pistol.png",
+                "gun_idle": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
+                "gun_firing": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
+                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/pistol_inventory.png",
                 "bullet_capacity": 15,
                 "bullet_damage": 15,
                 "reload_time": 120
@@ -202,7 +205,7 @@ class Gun(Item):
                 "gun_idle": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
                 "gun_firing": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
                 "gun_reloading": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
-                "inventory_image": "./graphics/sprites/gun_sprites/PNG/shotgun_idle.png",
+                "inventory_image": "./graphics/sprites/gun_sprites/PNG/shotgun_inventory.png",
                 "bullet_capacity": 6,
                 "bullet_damage": 25,
                 "reload_time": 300
@@ -270,7 +273,7 @@ class Bullet(pygame.sprite.Sprite):
         self.image.fill((255, 204, 0))
         self.rect = self.image.get_rect()
         self.hitbox = hitbox
-        self.rect.center = (self.hitbox.x + gun_image.get_width() + 50, self.hitbox.y + 28)
+        self.rect.center = (self.hitbox.x + gun_image.get_width(), self.hitbox.y+4)
         if custom_direction is None:
             # calculate custom direction:
             # RANDOM CALCULATION WITH DEVIATION SIMILAR TO SHOTGUN

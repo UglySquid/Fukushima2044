@@ -21,7 +21,7 @@ def import_folder(path):
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, position, sprite_group, obstacle_sprites, screen):
+    def __init__(self, position, sprite_group, obstacle_sprites, bullet_sprites, screen):
         super().__init__(sprite_group)
 
         # alive or dead
@@ -41,7 +41,7 @@ class Player(pygame.sprite.Sprite):
                              pygame.mixer.Sound("./audio/death_sound_3.wav")]
 
         # Create bullets
-        self.bullet_sprites = pygame.sprite.Group()
+        self.bullet_sprites = bullet_sprites
         self.player_hitpoints = 100
         self.armor_value = 0
 
@@ -155,7 +155,7 @@ class Player(pygame.sprite.Sprite):
             # Mouse cursor is not over the inventory area
             if self.inventory.weapon is not None and (not (245 <= mouse_pos[0] <= 720 and 600 <= mouse_pos[1] <= 695)):
                 if self.mouse_clicked is False:
-                    self.inventory.weapon.shoot(self.screen, mouse_pos, self.bullet_sprites, self.obstacle_sprites, self.rect)
+                    self.inventory.weapon.shoot(self.screen, mouse_pos, self.bullet_sprites, self.obstacle_sprites)
             # for if you click menu button
             if True:
                 pass
@@ -176,6 +176,22 @@ class Player(pygame.sprite.Sprite):
                             self.inventory.remove_inventory_item(i)
 
     def collisions(self, direction):
+        print(self.bullet_sprites.sprites(), "dig")
+
+        for sprite in self.bullet_sprites.sprites():
+            print("sprite, test test", sprite)
+            if sprite.rect.colliderect(self.rect):
+                channel5 = pygame.mixer.Channel(4)
+                channel5.play(self.pain_sounds[random.randint(0, 2)])
+                if self.inventory.armor_value == 0:
+                    self.inventory.player_hitpoints -= sprite.bullet_damage
+                else:
+                    self.inventory.armor_value -= sprite.bullet_damage
+                    if self.inventory.armor_value < 0:
+                        self.inventory.player_hitpoints += self.inventory.armor_value
+                        self.inventory.armor_value = 0
+                sprite.kill()
+
         for sprite in self.obstacle_sprites.sprites():
             if hasattr(sprite, 'hitbox'):
                 if sprite.hitbox.colliderect(self.hitbox):
@@ -232,7 +248,7 @@ class Player(pygame.sprite.Sprite):
         if self.inventory.player_hitpoints <= 0:
             channel6 = pygame.mixer.Channel(5)
             channel6.play(self.death_sounds[random.randint(0, 2)])
-            self.kill()
+            self.dead = True
         self.screen.blit(self.my_hitbox_visualizer, self.hitbox.topleft)
         self.keyboard_input()
 
@@ -251,6 +267,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = self.hitbox.center
         self.inventory.render_player_items(actions, bot_group)
 
+
+        # draws bullet sprites
         self.bullet_sprites.draw(self.screen)
         self.bullet_sprites.update()
 
@@ -272,7 +290,7 @@ class Inventory(Player):
         self.hp_bars_bg.fill((64, 64, 64))
         self.quest_bar_bg = pygame.transform.scale(pygame.image.load("./graphics/UI/quest_completion_bar.png"), (181,30))
         self.objective_background_bar = pygame.transform.scale(pygame.image.load("./graphics/sprites/item_sprites/inventory_back.png"), (270, 100))
-        self.objective_font = pygame.font.SysFont("Arial",26)
+        self.objective_font = pygame.font.SysFont("Arial",20)
         self.objective_text = self.objective_font.render("Quest Objective: Kill 20 AI", True, (255, 255, 255))
         self.objective_text_2 = self.objective_font.render("Quest Objective: Kill 30 AI", True, (255, 255, 255))
         self.armor_value = armor_value
@@ -541,7 +559,7 @@ class Gun(Item):
         screen.blit(forward_slash, (67, 590))
         screen.blit(self.bullet_capacity_text, (75, 590))
 
-    def shoot(self, screen, mouse_position, bullet_sprite_group, obstacle_sprites, player_pos):
+    def shoot(self, screen, mouse_position, bullet_sprite_group, obstacle_sprites):
         if self.bullet_capacity > 0:
             channel2 = pygame.mixer.Channel(1)
             channel2.play(self.gun_firing_sound)

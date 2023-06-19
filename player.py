@@ -30,6 +30,7 @@ class Player(pygame.sprite.Sprite):
 
         # Create screen
         self.screen = screen
+        self.reload_pressed = None
 
         # Sounds
         self.pain_sounds = [pygame.mixer.Sound("./audio/pain_sound.wav"),
@@ -101,6 +102,12 @@ class Player(pygame.sprite.Sprite):
 
     def keyboard_input(self):
         keys = pygame.key.get_pressed()
+        if keys[pygame.K_r]:
+            if self.inventory.weapon is not None:
+                self.reload_pressed = True
+                self.gun_reloading_sound = pygame.mixer.Sound("audio\\gun_reload.mp3")
+                channel3 = pygame.mixer.Channel(2)
+                channel3.play(self.gun_reloading_sound)
         if keys[pygame.K_a]:
             self.direction.x = -5
             self.status = 'left'
@@ -209,7 +216,11 @@ class Player(pygame.sprite.Sprite):
         self.collisions('vertical')
 
     def update(self, dt, bullet_sprites, player_position, bot_group):
-
+        if self.inventory.weapon and self.reload_pressed is not None:
+            if self.inventory.weapon.bullet_capacity != self.inventory.weapon.max_bullet_capacity:
+                self.inventory.weapon.reload()
+            else:
+                self.reload_pressed = None
         if self.inventory.player_hitpoints <= 0:
             channel6 = pygame.mixer.Channel(5)
             channel6.play(self.death_sounds[random.randint(0, 2)])
@@ -489,7 +500,7 @@ class Gun(Item):
                 "gun_firing": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
                 "gun_reloading": "./graphics/sprites/gun_sprites/PNG/sniper_rifle_idle.png",
                 "inventory_image": "./graphics/sprites/gun_sprites/PNG/sniper_inventory.png",
-                "bullet_capacity": 5,
+                "bullet_capacity": 1,
                 "bullet_damage": 150,
                 "reload_time": 180
             },
@@ -503,9 +514,9 @@ class Gun(Item):
                 "reload_time": 180
             },
             "pistol": {
-                "gun_idle": "./graphics/sprites/gun_sprites/PNG/pistol.png",
-                "gun_firing": "./graphics/sprites/gun_sprites/PNG/pistol.png",
-                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/pistol.png",
+                "gun_idle": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
+                "gun_firing": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
+                "gun_reloading": "./graphics/sprites/gun_sprites/PNG/pistol_idle.png",
                 "inventory_image": "./graphics/sprites/gun_sprites/PNG/pistol_inventory.png",
                 "bullet_capacity": 15,
                 "bullet_damage": 15,
@@ -553,28 +564,28 @@ class Gun(Item):
             self.bullet_capacity -= 1
 
             gun_firing_png = pygame.image.load(self.gun_firing)
-            screen.blit(gun_firing_png, (player_pos[0]+50, player_pos[1]+15))
+            screen.blit(gun_firing_png, (555,364))
             print("hi")
             if self.gun_type == "shotgun":
                 for i in range(3):
                     if i == 0:  # Deviated bullets for spread effect
                         deviation = 75
                           # Deviation for y-component
-                        bullet_direction = pygame.Vector2(mouse_position[0] - player_pos[0] + deviation,
-                                                          mouse_position[1] - player_pos[1] + deviation)
-                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, bullet_direction, player_pos, self.bullet_damage)
+                        bullet_direction = pygame.Vector2(mouse_position[0] - 555 + deviation,
+                                                          mouse_position[1] - 364 + deviation)
+                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, bullet_direction, (555,364), self.bullet_damage)
                     elif i == 2:
                         deviation = 45  # Deviation for x-component
                         # Deviation for y-component
-                        bullet_direction = pygame.Vector2(mouse_position[0] - player_pos[0] - deviation,
-                                                          mouse_position[1] - player_pos[1] - deviation)
-                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, bullet_direction, player_pos, self.bullet_damage)
+                        bullet_direction = pygame.Vector2(mouse_position[0] - 555 - deviation,
+                                                          mouse_position[1] - 364 - deviation)
+                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, bullet_direction, (555,364), self.bullet_damage)
                     else:  # Center bullet, no deviation
-                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None, player_pos, self.bullet_damage)
+                        bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None, (555,364), self.bullet_damage)
                     bullet_sprite_group.add(bullet)
                     bullet.update()
             else:
-                bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None, player_pos, self.bullet_damage)
+                bullet = Bullet(mouse_position, gun_firing_png, obstacle_sprites, screen, None, (555,364), self.bullet_damage)
                 bullet_sprite_group.add(bullet)
                 bullet.update()
 
@@ -604,9 +615,9 @@ class Bullet(pygame.sprite.Sprite):
         self.image.fill((255, 204, 0))
         self.rect = self.image.get_rect()
         self.hitbox = hitbox
-        self.rect.center = (self.hitbox.x + gun_image.get_width() + 50, self.hitbox.y + 28)
+        self.rect.center = (self.hitbox[0] + gun_image.get_width()-10, self.hitbox[1] + gun_image.get_height() -20)
         if custom_direction is None:
-            direction = pygame.math.Vector2(mouse_position[0] - self.hitbox.x, mouse_position[1] - self.hitbox.y)
+            direction = pygame.math.Vector2(mouse_position[0] - self.hitbox[0], mouse_position[1] - self.hitbox[1])
         else:
             direction = custom_direction
         self.direction = direction.normalize()  # Normalize the direction vector

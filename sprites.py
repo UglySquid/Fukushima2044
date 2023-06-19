@@ -29,7 +29,7 @@ class Tile(pygame.sprite.Sprite):
 class Trees(Tile):
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width*1, -self.rect.height*1)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.9, -self.rect.height * 0.6)
         self.hitbox.bottom = self.rect.bottom-50
 
 
@@ -49,18 +49,18 @@ class Chest(Tile):
         self.apple_pos = self.rect
         self.apple_sprites = pygame.sprite.Group()
 
-    # def open(self):
-    #     self.image = pygame.image.load("./graphics/chests/chest_open.png")
-    #     self.create_apple()
-    #
-    # def create_apple(self):
-    #     Tile(pos=apple_pos,
-    #          surface=self.apples_surf,
-    #          groups=[self.apple_sprites, self.groups()[0]],
-    #          z=LAYERS['apple'])
-    #
-    # def get_name(self):
-    #     return self.name
+    def open(self):
+        self.image = pygame.image.load("./graphics/chests/chest_open.png")
+        self.create_apple()
+
+    def create_apple(self):
+        Tile(pos=apple_pos,
+             surface=self.apples_surf,
+             groups=[self.apple_sprites, self.groups()[0]],
+             z=LAYERS['apple'])
+
+    def get_name(self):
+        return self.name
 
 
 class Sprites:

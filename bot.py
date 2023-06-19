@@ -64,6 +64,7 @@ class Bot(pygame.sprite.Sprite):
     def collisions(self, direction, bullet_sprites, player_position):
         for sprite in bullet_sprites:
             if sprite.rect.colliderect(self.hitbox):
+                print("OCCIOJSDIOFJSDIOFJOIJDIOFSJ")
                 # return fire by the AI
                 self.return_fire = True
                 if self.already_said_enemy_contact is False:
@@ -103,7 +104,7 @@ class Bot(pygame.sprite.Sprite):
                     if self.y_direction < 0:
                         self.hitbox.top = sprite.hitbox.bottom
 
-    def update(self, dt, bullet_sprites, player_position, bot_group):
+    def update(self, dt, bullet_sprites, player_position, bot_group, actions):
         if self.return_fire:
             for bot in bot_group:
 

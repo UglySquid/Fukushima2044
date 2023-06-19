@@ -167,6 +167,14 @@ class Player(pygame.sprite.Sprite):
             # Reset mouse clicked to False
             self.mouse_clicked = False
 
+        if pygame.mouse.get_pressed()[2]:
+            mouse_pos = pygame.mouse.get_pos()
+            for i in range(6):
+                if mouse_pos[0] in range(245 + 95 * i, 340 + 95 * i):
+                    if mouse_pos[1] in range(600, 695):
+                        if self.inventory.player_items[i] is not None:
+                            self.inventory.remove_inventory_item(i)
+
     def collisions(self, direction):
         for sprite in self.obstacle_sprites.sprites():
             if hasattr(sprite, 'hitbox'):
@@ -215,7 +223,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centery = self.hitbox.centery
         self.collisions('vertical')
 
-    def update(self, dt, bullet_sprites, player_position, bot_group):
+    def update(self, dt, bullet_sprites, player_position, bot_group, actions):
         if self.inventory.weapon and self.reload_pressed is not None:
             if self.inventory.weapon.bullet_capacity != self.inventory.weapon.max_bullet_capacity:
                 self.inventory.weapon.reload()
@@ -241,7 +249,7 @@ class Player(pygame.sprite.Sprite):
         self.animate(dt)
 
         self.rect.center = self.hitbox.center
-        self.inventory.render_player_items(self.hitbox)
+        self.inventory.render_player_items(actions, bot_group)
 
         self.bullet_sprites.draw(self.screen)
         self.bullet_sprites.update()
@@ -262,6 +270,11 @@ class Inventory(Player):
         self.hp_bars = pygame.transform.scale(pygame.image.load("./graphics/UI/health_bar.png"), (333, 45))
         self.hp_bars_bg = pygame.Surface((333, 45))
         self.hp_bars_bg.fill((64, 64, 64))
+        self.quest_bar_bg = pygame.transform.scale(pygame.image.load("./graphics/UI/quest_completion_bar.png"), (181,30))
+        self.objective_background_bar = pygame.transform.scale(pygame.image.load("./graphics/sprites/item_sprites/inventory_back.png"), (270, 100))
+        self.objective_font = pygame.font.SysFont("Arial",26)
+        self.objective_text = self.objective_font.render("Quest Objective: Kill 20 AI", True, (255, 255, 255))
+        self.objective_text_2 = self.objective_font.render("Quest Objective: Kill 30 AI", True, (255, 255, 255))
         self.armor_value = armor_value
         # Gun("pistol")
         self.player_items = [Apple(), Gun("shotgun"), Gun("rifle"), Gun("sniper"), Gun("shotgun"), Gun("pistol")]
@@ -307,7 +320,7 @@ class Inventory(Player):
     def unequip_gun(self):
         self.weapon = None
 
-    def render_player_items(self, player_hitbox):
+    def render_player_items(self, actions, bot_group):
         inventory_slot_width = 50
         inventory_slot_height = 50
         inventory_margin = 10
@@ -353,6 +366,14 @@ class Inventory(Player):
         self.screen.blit(armor_value_bar, (356, 30 + 22))
         self.screen.blit(self.hp_bars, (356, 30))
 
+        quest_completion_amount = (20 - len(bot_group)) / 20
+
+        quest_completion_bar = pygame.Surface((quest_completion_amount * 181, 30))
+        quest_completion_bar.fill ((0,255,0))
+        self.screen.blit(self.objective_background_bar, (750,30))
+        self.screen.blit(self.objective_text,(762,50))
+        self.screen.blit(quest_completion_bar,(796,90))
+        self.screen.blit(self.quest_bar_bg, (795,90))
 
 # honestly this is kind of redundant
 class Item(Player):
@@ -417,15 +438,6 @@ class HeavyArmor(Item):
         super().__init__(item_type, item_subtype, item_image, inventory_image)
 
 
-class MRE(Item):
-    def __init__(self):
-        item_type = "heal"
-        item_subtype = 75
-        item_image = None
-        inventory_image = None  # [/* inventory image directory here */]
-        super().__init__(item_type, item_subtype, item_image, inventory_image)
-
-
 class Water(Item):
     def __init__(self):
         item_type = "heal"
@@ -460,34 +472,6 @@ class Apple(Item):
         item_image = "./graphics/sprites/item_sprites/apple.png"
         inventory_image = "./graphics/sprites/item_sprites/apple_inventory.png"
         super().__init__(item_type, item_subtype, item_image, inventory_image)
-
-
-class Photograph(Item):
-    def __init__(self):
-        item_type = "other"
-        item_subtype = "photograph"
-        item_image = None
-        inventory_image = None  # [/* inventory image directory here */]
-        super().__init__(item_type, item_subtype, item_image, inventory_image)
-
-
-class Soap(Item):
-    def __init__(self):
-        item_type = "other"
-        item_subtype = "soap"
-        item_image = None
-        inventory_image = None  # [/* inventory image directory here */]
-        super().__init__(item_type, item_subtype, item_image, inventory_image)
-
-
-class Toothpaste(Item):
-    def __init__(self):
-        item_type = "other"
-        item_subtype = "toothpaste"
-        item_image = None
-        inventory_image = None  # [/* inventory image directory here */]
-        super().__init__(item_type, item_subtype, item_image, inventory_image)
-
 
 class Gun(Item):
     def __init__(self, gun_type):

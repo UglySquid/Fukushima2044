@@ -58,6 +58,13 @@ class Chest(Tile):
              groups=[self.apple_sprites, self.groups()[0]],
              z=LAYERS['apple'])
 
+    def chest_click(self):
+        if pygame.mouse.get_pressed()[0] and self.rect.collidepoint(pygame.mouse.get_pos()):
+            print("hi")
+            self.open()
+        else:
+            pass
+
     def get_name(self):
         return self.name
 
@@ -107,13 +114,10 @@ class Sprites:
         for obj in tmx_data.get_layer_by_name('Houses'):
             City((obj.x, obj.y), obj.image, [self.sprite_group, self.obstacle_sprites], obj.name)
 
-        # for obj in tmx_data.get_layer_by_name('Fence'):
-        #     Fence((obj.x, obj.y), obj.image, [self.sprite_group, self.obstacle_sprites])
-
         for obj in tmx_data.get_layer_by_name('Chests'):
             Chest((obj.x, obj.y), obj.image, [self.sprite_group, self.obstacle_sprites])
 
-        self.player = player.Player((200, 200), self.sprite_group, self.obstacle_sprites, self.bullet_sprites, self.screen)
+        self.player = player.Player((200, 200), self.sprite_group, self.obstacle_sprites, self.screen)
         Tile(
             position=(0, 0),
             surface=pygame.image.load('./graphics/map_bg.png'),
@@ -128,29 +132,14 @@ class Sprites:
             guard = bot.Bot((1600, 1600),
                                        [self.sprite_group, self.bot_group],
                                        self.obstacle_sprites,
-                                       self.screen, self.bullet_sprites,
-                                       z=LAYERS["main"])
+                                       self.screen)
 
             self.bot_group.add(guard)
-
-    def chest_click(self):
-        for sprite in self.sprite_group:
-            if pygame.mouse.get_pressed()[0] and pygame.mouse.get_pos() == sprite.image.get_rect():
-                if sprite.get_name == "chest":
-                    sprite.open()
-                else:
-                    pass
-        # if pygame.mouse.get_pressed()[0]:
-        #     for sprite in self.sprite_group:
-        #         if sprite.get_name == "chest":
-        #             sprite.open()
-        #         else:
-        #             pass
 
     def run(self, dt, actions):
         self.screen.fill('black')
         self.sprite_group.custom_draw(self.player)
-        self.chest_click()
+        # self.chest_click()
         # self.screen.blit(self.cursor_image, player.Player.print_crosshair(self.screen))
         self.sprite_group.update(dt, self.bullet_sprites, self.player.hitbox, self.bot_group, actions)
         if self.player.get_hitpoints() <= 0:
@@ -159,6 +148,7 @@ class Sprites:
             self.player.dead = True
 
     def update(self):
+        # self.chest_click()
         self.sprite_group.draw(self.screen)
         self.bullet_sprites.draw(self.screen)
         self.bullet_sprites.update()

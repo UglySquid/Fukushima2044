@@ -6,4 +6,8 @@ Amid political unrest in Japan, a biological facility explodes in Fukushima, pro
 # To Play
 1. Clone this repository.
 2. Download the dependencies in the Fukushima2044 driectory. The dependencies are as follows: PyGame, PyTMX
-3. To play, use controls W, A, S, D to move up, left, down, right and your mouse.
+3. Your goal is to complete the quest of the level. For level 1, you must kill 10 AI. For level 2, you must kill 20 AI. 
+4. To play, use controls W, A, S, D to move up, left, down, right and your mouse.
+5. If you are losing too much HP, try eating an apple!
+6. If you want some immunity, try using the armor!
+7. To open chests, simply click on the chests. To collect items, simply walk until you touch the object and the object will automatically be added to your inventory. 

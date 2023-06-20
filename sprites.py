@@ -157,22 +157,15 @@ class Sprites:
         else:
             num_guards = 20
         for guard in range(num_guards):
-            guard = bot.Bot((1600, 1600),
-                    [self.sprite_group, self.bot_group],
-                    self.obstacle_sprites,
-                    self.screen, self.bullet_sprites,
-                    z=LAYERS["main"])
-
-            # guard = bot.Bot((random.randint(400, 2800), random.randint(400, 2800)),
-            #                 [self.sprite_group, self.bot_group],
-            #                 self.obstacle_sprites,
-            #                 self.screen, self.bullet_sprites,
-            #                 z=LAYERS["main"])
+            guard = bot.Bot((random.randint(400, 2800), random.randint(400, 2800)),
+                            [self.sprite_group, self.obstacle_sprites, self.bot_group],
+                            self.obstacle_sprites,
+                            self.screen, self.bullet_sprites,
+                            z=LAYERS["main"])
 
             self.bot_group.add(guard)
 
         # number of guards not working
-        # bots always spawn in the top left corner
 
     def run(self, dt, actions):
         for sprite in self.bot_group:

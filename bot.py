@@ -37,8 +37,11 @@ class Bot(pygame.sprite.Sprite):
         self.hit_marker_sound = pygame.mixer.Sound("./audio/hit_marker.mp3")
         self.image = self.sprite_right
         self.rect = self.image.get_rect()
+        self.rect.center = position
         self.x_direction = 0
         self.y_direction = 0
+        self.walking_direction = 0
+        self.walking_direction_timer = 0
         self.obstacle_sprites = obstacle_sprites
         self.death_sounds = [pygame.mixer.Sound("./audio/death_sound.wav"),
                              pygame.mixer.Sound("./audio/death_sound_2.wav"),
@@ -46,14 +49,13 @@ class Bot(pygame.sprite.Sprite):
         self.gun_reloading_sound = pygame.mixer.Sound("./audio/gun_reload.mp3")
         self.hitbox = self.rect
         self.reloading_sound_played = None
-        self.walking_direction = 0
-        self.walking_direction_timer = 0
         self.z = LAYERS['main']
 
     def move_ai(self):
         if self.inventory.weapon is not None:
             self.image = self.sprite_right
         if self.walking_direction == 4:
+            self.x_direction = -1
             self.x_direction = -1
         elif self.walking_direction == 2:
             self.x_direction = 1

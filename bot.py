@@ -273,8 +273,8 @@ class Bullet(pygame.sprite.Sprite):
             # calculate custom direction:
             original_direction = pygame.math.Vector2(mouse_position[0] - self.hitbox.x,
                                                      mouse_position[1] - self.hitbox.y)
-            deviation_x = random.uniform(-20, 20)
-            deviation_y = random.uniform(-20, 20)
+            deviation_x = random.uniform(-30, 30)
+            deviation_y = random.uniform(-30, 30)
             direction = original_direction + pygame.math.Vector2(deviation_x, deviation_y)
         else:
             direction = custom_direction

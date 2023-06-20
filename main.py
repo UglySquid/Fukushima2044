@@ -32,7 +32,7 @@ class Game:
                         "Pause": False,
                         "Title": False,
                         "Game over": False,
-                        "return": False}
+                        "return": False, "Game won": False}
         self.dt, self.prev_time = 0, 0
 
         self.state_stack = []

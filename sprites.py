@@ -63,7 +63,7 @@ class Chest(Tile):
 
 
 class Sprites:
-    def __init__(self, screen):
+    def __init__(self, screen, actions):
         # visible sprites = seen ones that don't have collision, obstacles = collisions
 
         # Get the screen sprites will be displayed on
@@ -79,9 +79,9 @@ class Sprites:
         self.bullet_sprites = pygame.sprite.Group()
 
         # set up sprites and create map
-        self.setup()
+        self.setup(actions)
 
-    def setup(self):
+    def setup(self, actions):
         # Initialize tmx data
         self.screen.fill((114, 117, 27))
         tmx_data = load_pygame('./data/tmx/fuki4.tmx')
@@ -120,8 +120,11 @@ class Sprites:
             groups=self.sprite_group,
             z=LAYERS['Ground']
         )
-
-        for guard in range(1):
+        if actions["Level1"]:
+            num_guards = 1
+        else:
+            num_guards = 20
+        for guard in range(num_guards):
             guard = bot.Bot((1600, 1600),
                                        [self.sprite_group, self.bot_group],
                                        self.obstacle_sprites,
@@ -151,6 +154,8 @@ class Sprites:
         # self.screen.blit(self.cursor_image, player.Player.print_crosshair(self.screen))
         self.sprite_group.update(dt, self.bullet_sprites, self.player.hitbox, self.bot_group, actions)
         if self.player.get_hitpoints() <= 0:
+            for sprite in self.bot_group:
+                sprite.kill()
             self.player.dead = True
 
     def update(self):

@@ -80,10 +80,10 @@ class Title(State):
 
     def update(self, delta_time, actions):
         if actions["Level1"]:
-            new_state = Level1(self.game)
+            new_state = Level1(self.game, actions)
             new_state.enter_state()
         if actions["Level2"]:
-            new_state = Level2(self.game)
+            new_state = Level2(self.game, actions)
             new_state.enter_state()
         self.game.reset_keys()
 
@@ -122,6 +122,20 @@ class GameOver(State):
         self.gameover_text = pygame.transform.scale(self.gameover_text,
                                                  (self.gameover_text.get_width() * 0.7, self.gameover_text.get_height() * 0.7))
 
+class GameWon(State):
+    def __init__(self, game):
+        self.game = game
+        State.__init__(self, game)
+
+        pygame.mixer.init()
+        pygame.mixer.music.load("audio/title_bg.mp3")
+        pygame.mixer.music.play(loops=-1)
+
+        self.background = pygame.image.load('graphics/fuki4.png')
+        self.gameover_text = pygame.image.load('./graphics/UI/gameover.png')
+        self.gameover_text = pygame.transform.scale(self.gameover_text,
+                                                    (self.gameover_text.get_width() * 0.7,
+                                                     self.gameover_text.get_height() * 0.7))
 
     def update(self, delta_time, actions):
         if actions["Title"]:
@@ -136,16 +150,16 @@ class GameOver(State):
         screen.blit(self.background, (0, 0))
         screen.blit(self.gameover_text, (100, 100))
 
-        # Restart
-        restart_btn = Button(screen, "RESTART", [150, screen.get_height() / 2 - 50])
-        restart_btn.draw()
+        # Back to Main Menu
+        menu_btn = Button(screen, "MAIN MENU", [150, screen.get_height() / 2 - 50])
+        menu_btn.draw()
 
         # Quit
         quit_btn = Button(screen, "QUIT", [150, screen.get_height() / 2 + 50])
         quit_btn.draw()
 
         # Events
-        if restart_btn.press():
+        if menu_btn.press():
             self.game.actions["Title"] = True
         if quit_btn.press():
             self.game.keepGoing = False
@@ -196,7 +210,7 @@ class PauseMenu(State):
 
 
 class Level1(State):
-    def __init__(self, game):
+    def __init__(self, game, actions):
         self.game = game
         State.__init__(self, game)
         pygame.mixer.init()
@@ -207,16 +221,20 @@ class Level1(State):
 
         self.screen = game.screen
         self.clock = pygame.time.Clock()
-        self.sprites = sprites.Sprites(self.screen)
+        self.sprites = sprites.Sprites(self.screen, actions)
         self.cursor_image = pygame.image.load('./graphics/UI/crosshair.png')
         self.cursor_image = pygame.transform.scale(self.cursor_image, (50, 50))
 
     def update(self, delta_time, actions):
+        actions["Level1"] = True
         if actions["Pause"]:
             new_state = PauseMenu(self.game)
             new_state.enter_state()
         if actions["Game over"]:
             new_state = GameOver(self.game)
+            new_state.enter_state()
+        if actions["Game won"]:
+            new_state = GameWon(self.game)
             new_state.enter_state()
 
         self.sprites.update()
@@ -239,13 +257,14 @@ class Level1(State):
             self.game.actions["Pause"] = True
         if self.sprites.player.dead:
             self.game.actions["Game over"] = True
-
+        if self.sprites.player.won:
+            self.game.actions["Game won"] = True
     def render_cursor(self, screen):
         self.screen.blit(self.cursor_image, player.Player.print_crosshair(screen))
 
 
 class Level2(State):
-    def __init__(self, game):
+    def __init__(self, game, actions):
         self.game = game
         State.__init__(self, game)
         pass

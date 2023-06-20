@@ -67,15 +67,6 @@ class Bot(pygame.sprite.Sprite):
         for sprite in self.bullet_sprites.sprites():
             print(sprite)
             if sprite.rect.colliderect(self.hitbox):
-                print("OCCIOJSDIOFJSDIOFJOIJDIOFSJ")
-                # return fire by the AI
-                self.return_fire = True
-                if self.already_said_enemy_contact is False:
-                    channel6 = pygame.mixer.Channel(5)
-                    channel6.play(self.engage_sounds[random.randint(0,1)])
-                    self.already_said_enemy_contact = True
-                channel4 = pygame.mixer.Channel(3)
-                channel4.play(self.hit_marker_sound)
                 if self.inventory.armor_value == 0:
                     self.inventory.player_hitpoints -= sprite.bullet_damage
                 else:
@@ -84,6 +75,16 @@ class Bot(pygame.sprite.Sprite):
                         self.inventory.player_hitpoints += sprite.bullet_damage
                         self.inventory.armor_value = 0
                 sprite.kill()
+                # return fire by the AI
+                self.return_fire = True
+                if self.already_said_enemy_contact is False:
+                    print(self.player_hitpoints)
+                    if self.player_hitpoints > 0:
+                        channel6 = pygame.mixer.Channel(5)
+                        channel6.play(self.engage_sounds[random.randint(0,1)])
+                    self.already_said_enemy_contact = True
+                channel4 = pygame.mixer.Channel(3)
+                channel4.play(self.hit_marker_sound)
                 print("WOW IT HAPPENED")
         # this doesn't work unless if a bullet hits yourself
         #for bullet in main.sprites.character.bullet_sprites:
@@ -168,6 +169,15 @@ class Item(Bot):
 
     def get_item_info(self):
         return self.item_info
+
+class Armor(Item):
+    def __init__(self):
+        item_type = "armor"
+        item_subtype = 50
+        item_image = "./graphics/sprites/item_sprites/armor.png"
+        inventory_image = "./graphics/sprites/item_sprites/armor_inventory.png"
+        super().__init__(item_type, item_subtype, item_image, inventory_image)
+
 
 class Gun(Item):
     def __init__(self, gun_type):

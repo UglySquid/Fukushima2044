@@ -78,8 +78,7 @@ class Bot(pygame.sprite.Sprite):
                 # return fire by the AI
                 self.return_fire = True
                 if self.already_said_enemy_contact is False:
-                    print(self.player_hitpoints)
-                    if self.player_hitpoints > 0:
+                    if self.inventory.player_hitpoints > 0:
                         channel6 = pygame.mixer.Channel(5)
                         channel6.play(self.engage_sounds[random.randint(0,1)])
                     self.already_said_enemy_contact = True

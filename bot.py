@@ -75,8 +75,13 @@ class Bot(pygame.sprite.Sprite):
             self.walking_direction = random.randint(0, 3)
 
         else:
-            self.x_direction = self.speed * self.directions[self.walking_direction][0]
-            self.y_direction = self.speed * self.directions[self.walking_direction][1]
+            if not self.return_fire:
+                self.x_direction = self.speed * self.directions[self.walking_direction][0]
+                self.y_direction = self.speed * self.directions[self.walking_direction][1]
+            else:
+                self.x_direction = 0 * self.directions[self.walking_direction][0]
+                self.y_direction = 0 * self.directions[self.walking_direction][1]
+
 
     def collisions(self, direction):
         for sprite in self.bullet_sprites.sprites():
@@ -88,7 +93,7 @@ class Bot(pygame.sprite.Sprite):
                     if self.inventory.armor_value < 0:
                         self.inventory.player_hitpoints += sprite.bullet_damage
                         self.inventory.armor_value = 0
-                self.dead = True
+                sprite.kill()
                 # return fire by the AI
                 self.return_fire = True
                 if self.already_said_enemy_contact is False:
@@ -124,14 +129,14 @@ class Bot(pygame.sprite.Sprite):
 
             self.return_fire_counter += 1
             if self.return_fire_counter % 45 == 0:
-                print("Lmaoaoaooao")
                 self.inventory.weapon.shoot(self.screen, player_position, bullet_sprites, self.obstacle_sprites, self.image_position)
         if self.inventory.player_hitpoints <= 0:
+            print(self.inventory.player_hitpoints)
             channel7 = pygame.mixer.Channel(6)
             channel7.play(self.death_sounds[random.randint(0, 2)])
             self.kill()
 
-        if not self.dead and self.inventory.weapon is not None:
+        if self.inventory.weapon is not None:
             if self.change_direction_timer == 0:
                 self.change_direction_timer = pygame.time.get_ticks()
 
@@ -141,7 +146,7 @@ class Bot(pygame.sprite.Sprite):
 
             self.move_ai()
 
-        if self.inventory.weapon:
+        elif self.inventory.weapon:
             if self.inventory.weapon.bullet_capacity <= 0:
                 if not self.reloading_sound_played:
                     channel = pygame.mixer.Channel(6)
@@ -150,9 +155,9 @@ class Bot(pygame.sprite.Sprite):
                 self.inventory.weapon.reload()
 
         if not self.return_fire:
+            print("WOWO")
             self.hitbox.x += self.x_direction
             self.hitbox.y += self.y_direction
-
             self.position = self.hitbox.topleft  # Update image position
 
         self.rect.center = self.hitbox.center

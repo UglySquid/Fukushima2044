@@ -1,5 +1,9 @@
-
-# IMPORTS
+"""
+date: june 19th, 2023
+name: christine wei and william yang
+description: this is the program's mainline logic and calls all other files to start and display the game
+"""
+# I - import
 import pygame
 
 import player
@@ -10,18 +14,20 @@ import time
 
 os.chdir(os.getcwd())
 
-# CLASSES
-
 
 class Game:
+    """
+    this is the main game class, defining the game window and calling all other functions to allow the game to run
+    """
     def __init__(self):
+        # Initialize
         pygame.init()
-
+        # Display
         self.game_canvas = pygame.Surface((1080, 720))
         self.screen = pygame.display.set_mode((1080, 720))
         pygame.display.set_caption("Fukushima 2044")
-
-        # self.clock = pygame.time.Clock()
+        # Time
+        self.clock = pygame.time.Clock()
         self.keepGoing, self.playing = True, True
         self.actions = {"left": False,
                         "right": False,
@@ -40,12 +46,14 @@ class Game:
 
     def run(self):
         while self.keepGoing:
+            # A - Action / E - Events
             self.get_dt()
             self.get_events()
             self.update()
             self.render()
 
     def get_events(self):
+        # Events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.playing = False
@@ -97,11 +105,12 @@ class Game:
 
     def render(self):
         self.state_stack[-1].render(self.screen)
-        # pygame.display.update()
+        # FPS / Clock
         pygame.display.flip()
-        # self.clock.tick(60)
+        self.clock.tick(60)
 
     def get_dt(self):
+        # time difference
         now = time.time()
         self.dt = now - self.prev_time
         self.prev_time = now
@@ -117,6 +126,6 @@ class Game:
         for action in self.actions:
             self.actions[action] = False
 
-
+# start the action
 game = Game()
 game.run()

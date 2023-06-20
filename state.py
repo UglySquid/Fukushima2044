@@ -76,7 +76,8 @@ class Title(State):
         self.background = pygame.image.load('graphics/fuki4.png')
         self.title_text = pygame.image.load('./graphics/UI/title_text.png')
         self.title_text = pygame.transform.scale(self.title_text,
-                                                 (self.title_text.get_width()*0.7, self.title_text.get_height()*0.7))
+                                                 (
+                                                 self.title_text.get_width() * 0.7, self.title_text.get_height() * 0.7))
 
     def update(self, delta_time, actions):
         if actions["Level1"]:
@@ -120,9 +121,41 @@ class GameOver(State):
         self.background = pygame.image.load('graphics/fuki4.png')
         self.gameover_text = pygame.image.load('./graphics/UI/gameover.png')
         self.gameover_text = pygame.transform.scale(self.gameover_text,
-                                                 (self.gameover_text.get_width() * 0.7, self.gameover_text.get_height() * 0.7))
+                                                    (self.gameover_text.get_width() * 0.7,
+                                                     self.gameover_text.get_height() * 0.7))
+    def update(self, delta_time, actions):
+        if actions["Title"]:
+            new_state = Title(self.game)
+            new_state.enter_state()
+
+        self.game.reset_keys()
+
+    def render(self, screen):
+        # Draw manu
+        screen.fill((114, 117, 27))
+        screen.blit(self.background, (0, 0))
+        screen.blit(self.gameover_text, (100, 100))
+
+        # Restart
+        menu_btn = Button(screen, "RESTART", [150, screen.get_height() / 2 - 50])
+        menu_btn.draw()
+
+        # Quit
+        quit_btn = Button(screen, "QUIT", [150, screen.get_height() / 2 + 50])
+        quit_btn.draw()
+
+        # Events
+        if menu_btn.press():
+            self.game.actions["Title"] = True
+        if quit_btn.press():
+            self.game.keepGoing = False
+
 
 class GameWon(State):
+    """
+    renders menu when game has been won by player - triggered by an event
+    """
+
     def __init__(self, game):
         self.game = game
         State.__init__(self, game)
@@ -166,6 +199,10 @@ class GameWon(State):
 
 
 class PauseMenu(State):
+    """
+    renders menu when game is paused by player - triggered by an event
+    """
+
     def __init__(self, game):
         self.game = game
 
@@ -173,13 +210,13 @@ class PauseMenu(State):
         State.__init__(self, game)
 
         # Resume game / exit menu Button
-        self.resume_btn = Button(self.screen, "RESUME", [150, self.screen.get_height()/2-50])
+        self.resume_btn = Button(self.screen, "RESUME", [150, self.screen.get_height() / 2 - 50])
 
         # Return to main menu button
-        self.title_btn = Button(self.screen, "TITLE", [150, self.screen.get_height()/2+50])
+        self.title_btn = Button(self.screen, "TITLE", [150, self.screen.get_height() / 2 + 50])
 
         # Quit Menu Button
-        self.quit_btn = Button(self.screen, "QUIT", [150, self.screen.get_height()/2+150])
+        self.quit_btn = Button(self.screen, "QUIT", [150, self.screen.get_height() / 2 + 150])
 
     def update(self, delta_time, actions):
         if actions["Title"]:
@@ -210,6 +247,10 @@ class PauseMenu(State):
 
 
 class Level1(State):
+    """
+    first level of the game, starts playing music and also causes game to render in properly
+    """
+
     def __init__(self, game, actions):
         self.game = game
         State.__init__(self, game)
@@ -226,11 +267,17 @@ class Level1(State):
         self.cursor_image = pygame.transform.scale(self.cursor_image, (50, 50))
 
     def update(self, delta_time, actions):
+        # 'Events' part of ALTER framework, Action in IDEA, checks for all pause/win/lose events occurring from the game
         actions["Level1"] = True
         if actions["Pause"]:
             new_state = PauseMenu(self.game)
             new_state.enter_state()
         if actions["Game over"]:
+            for group in [self.sprites.obstacle_sprites, self.sprites.bot_group, self.sprites.chest_group, self.sprites.floor_items,
+                          self.sprites.bullet_sprites]:
+                for sprite in group:
+                    sprite.kill()
+            self.sprites.player.kill()
             new_state = GameOver(self.game)
             new_state.enter_state()
         if actions["Game won"]:
@@ -245,7 +292,8 @@ class Level1(State):
 
     def render(self, screen):
         menu_btn = Button(screen, "Menu", [100, 100])
-        menu_btn.button = pygame.transform.scale(menu_btn.button, (menu_btn.button.get_width()*0.7, menu_btn.button.get_height()*0.7))
+        menu_btn.button = pygame.transform.scale(menu_btn.button, (
+        menu_btn.button.get_width() * 0.7, menu_btn.button.get_height() * 0.7))
         menu_btn.button_rect = menu_btn.button.get_rect()
         menu_btn.draw()
 
@@ -259,11 +307,16 @@ class Level1(State):
             self.game.actions["Game over"] = True
         if self.sprites.player.won:
             self.game.actions["Game won"] = True
+
     def render_cursor(self, screen):
         self.screen.blit(self.cursor_image, player.Player.print_crosshair(screen))
 
 
 class Level2(State):
+    """
+    second level of the game, starts playing music and also causes game to render in properly
+    """
+
     def __init__(self, game, actions):
         self.game = game
         State.__init__(self, game)

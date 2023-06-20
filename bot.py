@@ -26,6 +26,7 @@ class Bot(pygame.sprite.Sprite):
         self.already_said_enemy_contact = False
         self.return_fire = False
         self.return_fire_counter = 0
+
         self.position = position
         self.screen = screen
         self.mouse_clicked = False
@@ -35,13 +36,16 @@ class Bot(pygame.sprite.Sprite):
         self.inventory = Inventory(self.player_hitpoints, self.armor_value)
         self.sprite_right = pygame.image.load("./graphics/player/right/right_0.png")
         self.hit_marker_sound = pygame.mixer.Sound("./audio/hit_marker.mp3")
+
         self.image = self.sprite_right
         self.rect = self.image.get_rect()
         self.rect.center = position
-        self.x_direction = 0
-        self.y_direction = 0
-        self.walking_direction = 0
-        self.walking_direction_timer = 0
+
+        self.change_direction_timer = pygame.time.get_ticks()
+        self.patrol_timer = pygame.time.get_ticks()
+        self.patrol_duration = 2000  # 2 seconds
+        self.walking_direction = random.randint(1, 4)
+
         self.obstacle_sprites = obstacle_sprites
         self.death_sounds = [pygame.mixer.Sound("./audio/death_sound.wav"),
                              pygame.mixer.Sound("./audio/death_sound_2.wav"),
@@ -52,22 +56,33 @@ class Bot(pygame.sprite.Sprite):
         self.z = LAYERS['main']
 
     def move_ai(self):
+        speed = 0.1
         if self.inventory.weapon is not None:
             self.image = self.sprite_right
-        if self.walking_direction == 4:
-            self.x_direction = -1
-            self.x_direction = -1
-        elif self.walking_direction == 2:
-            self.x_direction = 1
-        else:
-            self.x_direction = 0
 
-        if self.walking_direction == 3:
-            self.y_direction = -1
-        elif self.walking_direction == 1:
-            self.y_direction = 1
-        else:
+        if pygame.time.get_ticks() - self.change_direction_timer >= self.patrol_duration:
+            self.change_direction_timer = pygame.time.get_ticks()
+            self.patrol_timer = pygame.time.get_ticks()
+            self.walking_direction += random.randint(1, 4)
+            if self.walking_direction > 4:
+                self.walking_direction = 0
+
+        if pygame.time.get_ticks() - self.patrol_timer <= self.patrol_duration / 2:
+            self.x_direction = 0
             self.y_direction = 0
+        else:
+            if self.walking_direction == 4:  # right
+                self.x_direction = speed
+                self.y_direction = 0
+            elif self.walking_direction == 2:  # up
+                self.x_direction = 0
+                self.y_direction = -speed
+            elif self.walking_direction == 3:  # left
+                self.x_direction = -speed
+                self.y_direction = 0
+            elif self.walking_direction == 1:  # down
+                self.x_direction = 0
+                self.y_direction = speed
 
     def collisions(self, direction):
         for sprite in self.bullet_sprites.sprites():
@@ -121,12 +136,17 @@ class Bot(pygame.sprite.Sprite):
             channel7 = pygame.mixer.Channel(6)
             channel7.play(self.death_sounds[random.randint(0, 2)])
             self.kill()
-        self.walking_direction_timer += 1
-        if self.walking_direction_timer % 350 == 0:
-            self.walking_direction += 1
-        if self.walking_direction > 4:
-            self.walking_direction = 0
-        self.move_ai()
+
+        if not self.dead and self.inventory.weapon is not None:
+            if self.change_direction_timer == 0:
+                self.change_direction_timer = pygame.time.get_ticks()
+
+            if pygame.time.get_ticks() - self.change_direction_timer >= 10000:
+                self.change_direction_timer = pygame.time.get_ticks()
+                self.walking_direction = random.randint(1, 4)
+
+            self.move_ai()
+
         if self.inventory.weapon:
             if self.inventory.weapon.bullet_capacity <= 0:
                 if not self.reloading_sound_played:
@@ -278,7 +298,7 @@ class Bullet(pygame.sprite.Sprite):
         self.direction = direction.normalize()
 
     def update(self):
-        speed = 7.0
+        speed = 7
         self.direction.normalize()
         self.rect.x += self.direction.x * speed
         self.rect.y += self.direction.y * speed

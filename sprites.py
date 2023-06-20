@@ -125,7 +125,7 @@ class Sprites:
             z=LAYERS['Ground']
         )
         if actions["Level1"]:
-            num_guards = 1
+            num_guards = 10
         else:
             num_guards = 20
         for guard in range(num_guards):

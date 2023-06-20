@@ -163,8 +163,7 @@ class Player(pygame.sprite.Sprite):
                     if mouse_pos[1] in range(600, 695):
                         if self.inventory.player_items[i] is not None and not self.mouse_clicked:
 
-                            if self.inventory.player_items[i].get_item_info()[
-                                0] == "gun" and self.inventory.weapon is not None:
+                            if self.inventory.player_items[i].get_item_info()[0] == "gun" and self.inventory.weapon is not None:
                                 self.inventory.weapon = None
                                 continue
                             self.inventory.use_inventory_item(i, self.inventory.player_items[i].get_item_info())
@@ -194,7 +193,7 @@ class Player(pygame.sprite.Sprite):
 
     def collisions(self, direction):
         for apple in self.apple_sprites.sprites():
-            if apple.hitbox.colliderect(self.hitbox) and not apple.chest_is_open:
+            if apple.hitbox.colliderect(self.hitbox) and hasattr(apple, 'is_apple'):
                 self.inventory.add_inventory_item(Apple())
                 apple.kill()
         for sprite in self.bullet_sprites.sprites():

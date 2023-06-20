@@ -16,54 +16,6 @@ from settings import *
 
 os.chdir(os.getcwd())
 
-apple_pos = [(30, 30)]
-
-
-class Tile(pygame.sprite.Sprite):
-    """
-    Generic class tile. Parent class for all the tile objects
-    """
-    def __init__(self, position, surface, groups, z=LAYERS['main']):
-        super().__init__(groups)
-        self.image = surface
-        self.rect = self.image.get_rect(topleft=position)
-        self.z = z
-        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.7, -self.rect.height*0.7)
-
-
-class Apple(pygame.sprite.Sprite):
-    """
-    Apple class
-    """
-    def __init__(self, position, groups=None):
-        super().__init__(groups)
-        self.image = pygame.image.load("./graphics/sprites/item_sprites/apple_inventory.png")
-        self.apple_pos = position
-        self.chest_is_open = False
-        self.rect = self.image.get_rect(topleft=position)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
-        self.z = LAYERS['apple']
-
-
-class Trees(Tile):
-    """
-    this class contains the tree tiles that are present in the in game world
-    """
-
-    def __init__(self, position, surface, groups, name):
-        super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width * 1, -self.rect.height * 1)
-
-
-class City(Tile):
-    """
-    this class contains the city (building) tiles that are present in the in game world
-    """
-
-    def __init__(self, position, surface, groups, name):
-        super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.5, -self.rect.height * 0.5)
-
 
 import os
 import random
@@ -79,6 +31,9 @@ os.chdir(os.getcwd())
 
 
 class Tile(pygame.sprite.Sprite):
+    """
+    Generic class tile. Parent class for all the tile objects
+    """
     def __init__(self, position, surface, groups, z=LAYERS['main']):
         super().__init__(groups)
         self.image = surface
@@ -91,20 +46,26 @@ class Apple(pygame.sprite.Sprite):
     def __init__(self, position, groups=None):
         super().__init__(groups)
         self.image = pygame.image.load("./graphics/sprites/item_sprites/apple_inventory.png")
+        self.is_apple = True
         self.apple_pos = position
-        self.chest_is_open = False
         self.rect = self.image.get_rect(topleft=position)
         self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
         self.z = LAYERS['apple']
 
 
 class Trees(Tile):
+    """
+    this class contains the tree tiles that are present in the in game world
+    """
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
         self.hitbox = self.rect.copy().inflate(-self.rect.width*1, -self.rect.height*1)
 
 
 class City(Tile):
+    """
+    this class contains the city (building) tiles that are present in the in game world
+    """
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
         self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.5, -self.rect.height * 0.5)
@@ -122,6 +83,7 @@ class Chest(Tile):
 
         self.apples_surf = pygame.image.load("./graphics/sprites/item_sprites/apple_inventory.png")
         self.apple_pos = position
+        self.chest_is_open = False
 
     def open(self):
         self.image = pygame.image.load("./graphics/chests/chest_open.png")
@@ -202,15 +164,6 @@ class Sprites:
                             z=LAYERS["main"])
 
             self.bot_group.add(guard)
-
-    def chest_click(self):
-        # checks if chests are clicked and opens them accordingly (EVENTS)
-        for sprite in self.sprite_group:
-            if pygame.mouse.get_pressed()[0] and pygame.mouse.get_pos() == sprite.image.get_rect():
-                if sprite.get_name == "chest":
-                    sprite.open()
-                else:
-                    pass
 
     def run(self, dt, actions):
         # R - Refresh screen and update all sprites

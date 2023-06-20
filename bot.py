@@ -41,10 +41,10 @@ class Bot(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.position
 
-        self.x_direction = 0
-        self.y_direction = 0
+        self.x_direction = None
+        self.y_direction = None
 
-        self.speed = 1
+        self.speed = 30
         self.directions = [
             (0, -1),  # Up
             (1, 0),  # Right
@@ -152,6 +152,7 @@ class Bot(pygame.sprite.Sprite):
         if not self.return_fire:
             self.hitbox.x += self.x_direction
             self.hitbox.y += self.y_direction
+
             self.position = self.hitbox.topleft  # Update image position
 
         self.rect.center = self.hitbox.center

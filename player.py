@@ -193,9 +193,10 @@ class Player(pygame.sprite.Sprite):
 
     def collisions(self, direction):
         for apple in self.apple_sprites.sprites():
-            if apple.hitbox.colliderect(self.hitbox) and hasattr(apple, 'is_apple'):
-                self.inventory.add_inventory_item(Apple())
-                apple.kill()
+            if hasattr(apple, 'is_apple'):
+                if apple.hitbox.colliderect(self.hitbox):
+                    self.inventory.add_inventory_item(Apple())
+                    apple.kill()
         for sprite in self.bullet_sprites.sprites():
             if sprite.rect.colliderect(self.image_position):
                 channel5 = pygame.mixer.Channel(4)

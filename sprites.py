@@ -90,8 +90,8 @@ class Chest(Tile):
         self.create_apple()
 
     def create_apple(self):
-        Apple(position=self.apple_pos, groups=[self.groups()[0], self.groups()[2]])
         self.chest_is_open = True
+        Apple(position=self.apple_pos, groups=[self.groups()[0], self.groups()[2]])
 
 
 class Sprites:
@@ -163,6 +163,7 @@ class Sprites:
                             self.screen, self.bullet_sprites,
                             z=LAYERS["main"])
 
+
             self.bot_group.add(guard)
 
         # number of guards not working
@@ -180,10 +181,11 @@ class Sprites:
         mouse_pos = list(pygame.mouse.get_pos())
         mouse_pos[0] += self.sprite_group.offset.x
         mouse_pos[1] += self.sprite_group.offset.y
-        for sprite in self.obstacle_sprites.sprites():
-            if hasattr(sprite, 'chest'):
-                if pygame.mouse.get_pressed()[0] and sprite.chest_rect.collidepoint(mouse_pos):
-                    sprite.open()
+
+        for chest in self.apple_sprites.sprites():
+            if hasattr(chest, 'chest'):
+                if pygame.mouse.get_pressed()[0] and chest.chest_rect.collidepoint(mouse_pos):
+                    chest.open()
 
         self.sprite_group.update(dt, self.bullet_sprites, self.player.image_position, self.bot_group, actions)
         if self.player.get_hitpoints() <= 0:

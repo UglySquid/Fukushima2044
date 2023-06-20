@@ -328,4 +328,60 @@ class Level2(State):
     def __init__(self, game, actions):
         self.game = game
         State.__init__(self, game)
-        pass
+        pygame.mixer.init()
+
+        pygame.mixer.init()
+        pygame.mixer.music.load("./audio/background-ambience.mp3")
+        pygame.mixer.music.play(loops=-1)
+
+        self.screen = game.screen
+        self.clock = pygame.time.Clock()
+        self.sprites = sprites.Sprites(self.screen, actions)
+        self.cursor_image = pygame.image.load('./graphics/UI/crosshair.png')
+        self.cursor_image = pygame.transform.scale(self.cursor_image, (50, 50))
+
+    def update(self, delta_time, actions):
+        # 'Events' part of ALTER framework, Action in IDEA, checks for all pause/win/lose events occurring from the game
+        actions["Level2"] = True
+        if actions["Pause"]:
+            new_state = PauseMenu(self.game)
+            new_state.enter_state()
+        if actions["Game over"]:
+            for group in [self.sprites.obstacle_sprites, self.sprites.bot_group, self.sprites.chest_group,
+                          self.sprites.floor_items,
+                          self.sprites.bullet_sprites]:
+                for sprite in group:
+                    sprite.kill()
+            self.sprites.player.kill()
+            new_state = GameOver(self.game)
+            new_state.enter_state()
+        if actions["Game won"]:
+            new_state = GameWon(self.game)
+            new_state.enter_state()
+
+        self.sprites.update()
+
+        dt = self.clock.tick() / 1000
+        self.sprites.run(dt, actions)
+        self.game.reset_keys()
+
+    def render(self, screen):
+        menu_btn = Button(screen, "Menu", [100, 100])
+        menu_btn.button = pygame.transform.scale(menu_btn.button, (
+            menu_btn.button.get_width() * 0.7, menu_btn.button.get_height() * 0.7))
+        menu_btn.button_rect = menu_btn.button.get_rect()
+        menu_btn.draw()
+
+        if self.game.state_stack[0] == "Pause":
+            self.screen.blit(self.cursor_image, player.Player.print_crosshair(screen))
+
+        # Events (Check button presses)
+        if menu_btn.press():
+            self.game.actions["Pause"] = True
+        if self.sprites.player.dead:
+            self.game.actions["Game over"] = True
+        if self.sprites.player.won:
+            self.game.actions["Game won"] = True
+
+    def render_cursor(self, screen):
+        self.screen.blit(self.cursor_image, player.Player.print_crosshair(screen))

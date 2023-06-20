@@ -132,7 +132,7 @@ class GameWon(State):
         pygame.mixer.music.play(loops=-1)
 
         self.background = pygame.image.load('graphics/fuki4.png')
-        self.gameover_text = pygame.image.load('./graphics/UI/gameover.png')
+        self.gameover_text = pygame.image.load('./graphics/UI/you_won.png')
         self.gameover_text = pygame.transform.scale(self.gameover_text,
                                                     (self.gameover_text.get_width() * 0.7,
                                                      self.gameover_text.get_height() * 0.7))

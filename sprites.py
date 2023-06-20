@@ -20,16 +20,29 @@ apple_pos = [(30, 30)]
 
 
 class Tile(pygame.sprite.Sprite):
+    """
+    Generic class tile. Parent class for all the tile objects
+    """
     def __init__(self, position, surface, groups, z=LAYERS['main']):
         super().__init__(groups)
         self.image = surface
         self.rect = self.image.get_rect(topleft=position)
         self.z = z
-        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
-        self.name = "object"
+        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.7, -self.rect.height*0.7)
 
-    def get_name(self):
-        return self.name
+
+class Apple(pygame.sprite.Sprite):
+    """
+    Apple class
+    """
+    def __init__(self, position, groups=None):
+        super().__init__(groups)
+        self.image = pygame.image.load("./graphics/sprites/item_sprites/apple_inventory.png")
+        self.apple_pos = position
+        self.chest_is_open = False
+        self.rect = self.image.get_rect(topleft=position)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
+        self.z = LAYERS['apple']
 
 
 class Trees(Tile):
@@ -52,32 +65,71 @@ class City(Tile):
         self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.5, -self.rect.height * 0.5)
 
 
+import os
+import random
+
+import player
+import pygame
+import bot
+from pytmx.util_pygame import load_pygame
+
+from settings import *
+
+os.chdir(os.getcwd())
+
+
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, position, surface, groups, z=LAYERS['main']):
+        super().__init__(groups)
+        self.image = surface
+        self.rect = self.image.get_rect(topleft=position)
+        self.z = z
+        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.7, -self.rect.height*0.7)
+
+
+class Apple(pygame.sprite.Sprite):
+    def __init__(self, position, groups=None):
+        super().__init__(groups)
+        self.image = pygame.image.load("./graphics/sprites/item_sprites/apple_inventory.png")
+        self.apple_pos = position
+        self.chest_is_open = False
+        self.rect = self.image.get_rect(topleft=position)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
+        self.z = LAYERS['apple']
+
+
+class Trees(Tile):
+    def __init__(self, position, surface, groups, name):
+        super().__init__(position, surface, groups)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width*1, -self.rect.height*1)
+
+
+class City(Tile):
+    def __init__(self, position, surface, groups, name):
+        super().__init__(position, surface, groups)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.5, -self.rect.height * 0.5)
+
+
 class Chest(Tile):
     """
     this class contains the chest tiles that are present in the in game world (spawn open objects)
     """
-
     def __init__(self, position, surface, groups):
         super().__init__(position, surface, groups)
         self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
-        self.name = "chest"
+        self.chest = True
+        self.chest_rect = pygame.Rect(self.rect.left, self.rect.top, self.rect.x, self.rect.y)
 
-        self.apples_surf = pygame.image.load("./graphics/sprites/item_sprites/apple.png")
-        self.apple_pos = self.rect
-        self.apple_sprites = pygame.sprite.Group()
+        self.apples_surf = pygame.image.load("./graphics/sprites/item_sprites/apple_inventory.png")
+        self.apple_pos = position
 
     def open(self):
         self.image = pygame.image.load("./graphics/chests/chest_open.png")
         self.create_apple()
 
     def create_apple(self):
-        Tile(pos=apple_pos,
-             surface=self.apples_surf,
-             groups=[self.apple_sprites, self.groups()[0]],
-             z=LAYERS['apple'])
-
-    def get_name(self):
-        return self.name
+        Apple(position=self.apple_pos, groups=[self.groups()[0], self.groups()[2]])
+        self.chest_is_open = True
 
 
 class Sprites:
@@ -94,6 +146,7 @@ class Sprites:
 
         # sprite Groups
         self.sprite_group = CameraGroup()
+        self.apple_sprites = pygame.sprite.Group()
         self.obstacle_sprites = pygame.sprite.Group()
         self.bot_group = pygame.sprite.Group()
         self.chest_group = pygame.sprite.Group()
@@ -125,16 +178,17 @@ class Sprites:
             City((obj.x, obj.y), obj.image, [self.sprite_group, self.obstacle_sprites], obj.name)
 
         for obj in tmx_data.get_layer_by_name('Chests'):
-            Chest((obj.x, obj.y), obj.image, [self.sprite_group, self.obstacle_sprites])
+            Chest((obj.x, obj.y), obj.image, [self.sprite_group, self.obstacle_sprites, self.apple_sprites])
 
-        self.player = player.Player((200, 200), self.sprite_group, self.obstacle_sprites, self.bullet_sprites,
-                                    self.screen)
+        self.player = player.Player((200, 200), self.sprite_group, self.obstacle_sprites, self.bullet_sprites, self.apple_sprites, self.screen)
+
         Tile(
             position=(0, 0),
             surface=pygame.image.load('./graphics/map_bg.png'),
             groups=self.sprite_group,
             z=LAYERS['Ground']
         )
+
         # initialize AI guard entities based on the current level
         if actions["Level1"]:
             num_guards = 10
@@ -162,7 +216,15 @@ class Sprites:
         # R - Refresh screen and update all sprites
         self.screen.fill('black')
         self.sprite_group.custom_draw(self.player)
-        self.chest_click()
+
+        mouse_pos = list(pygame.mouse.get_pos())
+        mouse_pos[0] += self.sprite_group.offset.x
+        mouse_pos[1] += self.sprite_group.offset.y
+        for sprite in self.obstacle_sprites.sprites():
+            if hasattr(sprite, 'chest'):
+                if pygame.mouse.get_pressed()[0] and sprite.chest_rect.collidepoint(mouse_pos):
+                    sprite.open()
+
         self.sprite_group.update(dt, self.bullet_sprites, self.player.image_position, self.bot_group, actions)
         if self.player.get_hitpoints() <= 0:
             for sprite in self.bot_group:

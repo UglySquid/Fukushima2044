@@ -38,7 +38,7 @@ class Player(pygame.sprite.Sprite):
     within the IDEA and ALTER frameworks
     """
 
-    def __init__(self, position, sprite_group, obstacle_sprites, bullet_sprites, screen):
+    def __init__(self, position, sprite_group, obstacle_sprites, bullet_sprites, apple_sprites, screen):
         super().__init__(sprite_group)
 
         # alive or dead or won
@@ -65,6 +65,7 @@ class Player(pygame.sprite.Sprite):
 
         # create inventory
         self.inventory = Inventory(self.player_hitpoints, self.armor_value, self.screen)
+        self.apple_sprites = apple_sprites
 
         # Animation things
         self.player_animations = None
@@ -149,8 +150,6 @@ class Player(pygame.sprite.Sprite):
         else:
             self.direction.y = 0
 
-        if keys[pygame.K_TAB]:
-            self.inventory.add_inventory_item(Apple())
         if keys[pygame.K_1]:
             pass
         if pygame.mouse.get_pressed()[0]:
@@ -194,6 +193,10 @@ class Player(pygame.sprite.Sprite):
                             self.inventory.remove_inventory_item(i)
 
     def collisions(self, direction):
+        for apple in self.apple_sprites.sprites():
+            if apple.hitbox.colliderect(self.hitbox) and not apple.chest_is_open:
+                self.inventory.add_inventory_item(Apple())
+                apple.kill()
         for sprite in self.bullet_sprites.sprites():
             if sprite.rect.colliderect(self.image_position):
                 channel5 = pygame.mixer.Channel(4)
@@ -312,7 +315,7 @@ class Inventory(Player):
         self.objective_text = self.objective_font.render(" Objective: Kill 10 AI", True, (255, 255, 255))
         self.objective_text_2 = self.objective_font.render(" Objective: Kill 20 AI, Get Armor", True, (255, 255, 255))
         self.armor_value = armor_value
-        self.player_items = [Apple(), Gun("shotgun"), Gun("rifle"), Gun("sniper"), Armor(), Gun("pistol")]
+        self.player_items = [Apple(), Gun("shotgun"), Gun("rifle"), Gun("sniper"), Gun("pistol"), Armor()]
         self.inventory_sprite = pygame.transform.scale(
             pygame.image.load("./graphics/sprites/item_sprites/inventory_back.png"), (80, 80))
         self.weapon = None
@@ -321,10 +324,12 @@ class Inventory(Player):
         return self.won
 
     def add_inventory_item(self, item):
-        for inventory_slot in self.player_items:
+        for inventory_slot in range(len(self.player_items)):
             if self.player_items[inventory_slot] is None:
-                # item should be a class
+                # item should be an object
                 self.player_items[inventory_slot] = item
+            else:
+                pass
 
     def remove_inventory_item(self, item_pos):
         self.player_items[item_pos] = None
@@ -542,7 +547,6 @@ class Gun(Item):
                                 self.bullet_damage)
                 bullet_sprite_group.add(bullet)
                 bullet.update()
-
 
     def reload(self):
         self.reload_start_time += 1

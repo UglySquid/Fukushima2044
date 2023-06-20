@@ -155,7 +155,6 @@ class Bot(pygame.sprite.Sprite):
                 self.inventory.weapon.reload()
 
         if not self.return_fire:
-            print("WOWO")
             self.hitbox.x += self.x_direction
             self.hitbox.y += self.y_direction
             self.position = self.hitbox.topleft  # Update image position

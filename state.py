@@ -77,7 +77,8 @@ class Title(State):
         self.title_text = pygame.image.load('./graphics/UI/title_text.png')
         self.title_text = pygame.transform.scale(self.title_text,
                                                  (
-                                                 self.title_text.get_width() * 0.7, self.title_text.get_height() * 0.7))
+                                                     self.title_text.get_width() * 0.7,
+                                                     self.title_text.get_height() * 0.7))
 
     def update(self, delta_time, actions):
         if actions["Level1"]:
@@ -85,6 +86,9 @@ class Title(State):
             new_state.enter_state()
         if actions["Level2"]:
             new_state = Level2(self.game, actions)
+            new_state.enter_state()
+        if actions["return"]:
+            new_state = HowTo(self.game)
             new_state.enter_state()
         self.game.reset_keys()
 
@@ -102,11 +106,55 @@ class Title(State):
         level2_btn = Button(screen, "LEVEL 2", [screen.get_width() / 2, screen.get_height() / 2 + 150])
         level2_btn.draw()
 
+        # How to play button
+        how_btn = Button(screen, "HOW TO", [screen.get_width() / 2, screen.get_height() / 2 + 250])
+        how_btn.draw()
+
         # Events
         if level1_btn.press():
             self.game.actions["Level1"] = True
         if level2_btn.press():
             self.game.actions["Level2"] = True
+        if how_btn.press():
+            print("Hi")
+            self.game.actions["return"] = True
+
+
+class HowTo(State):
+    def __init__(self, game):
+        self.game = game
+
+        self.screen = self.game.screen
+        State.__init__(self, game)
+
+        # Load how to image
+        self.image = pygame.image.load('./graphics/UI/howto.png')
+        self.rect = self.image.get_rect()
+        self.rect.centery = game.screen.get_height()/2
+        self.rect.centerx = game.screen.get_width()/2 + 100
+
+        # Resume game / exit menu Button
+        self.close_btn = Button(self.screen, "CLOSE", [150, self.screen.get_height() / 2 - 50])
+
+    def update(self, delta_time, actions):
+        if actions["return"]:
+            self.exit_state()
+
+        self.game.reset_keys()
+
+    def render(self, screen):
+        screen.fill((114, 117, 27))
+
+        # Render the how to image
+        screen.blit(self.image, self.rect)
+
+        # Close the how to play guide
+        self.close_btn.draw()
+
+        # Check for events
+        if self.close_btn.press():
+            print("Hi")
+            self.game.actions["return"] = True
 
 
 class GameOver(State):
@@ -281,7 +329,8 @@ class Level1(State):
             new_state = PauseMenu(self.game)
             new_state.enter_state()
         if actions["Game over"]:
-            for group in [self.sprites.obstacle_sprites, self.sprites.bot_group, self.sprites.chest_group, self.sprites.floor_items,
+            for group in [self.sprites.obstacle_sprites, self.sprites.bot_group, self.sprites.chest_group,
+                          self.sprites.floor_items,
                           self.sprites.bullet_sprites]:
                 for sprite in group:
                     sprite.kill()
@@ -301,7 +350,7 @@ class Level1(State):
     def render(self, screen):
         menu_btn = Button(screen, "Menu", [100, 100])
         menu_btn.button = pygame.transform.scale(menu_btn.button, (
-        menu_btn.button.get_width() * 0.7, menu_btn.button.get_height() * 0.7))
+            menu_btn.button.get_width() * 0.7, menu_btn.button.get_height() * 0.7))
         menu_btn.button_rect = menu_btn.button.get_rect()
         menu_btn.draw()
 

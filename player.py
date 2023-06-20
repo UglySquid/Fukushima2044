@@ -21,7 +21,7 @@ def import_folder(path):
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, position, sprite_group, obstacle_sprites, screen):
+    def __init__(self, position, sprite_group, obstacle_sprites, apple_sprites, screen):
         super().__init__(sprite_group)
 
         # alive or dead
@@ -48,6 +48,7 @@ class Player(pygame.sprite.Sprite):
 
         # create inventory
         self.inventory = Inventory(self.player_hitpoints, self.armor_value, self.screen)
+        self.apple_sprites = apple_sprites
 
         # Animation things
         self.player_animations = None
@@ -131,9 +132,6 @@ class Player(pygame.sprite.Sprite):
             self.walking_sounds_outdoors[random.randint(0, 3)].play()
         else:
             self.direction.y = 0
-
-        if keys[pygame.K_TAB]:
-            self.inventory.add_inventory_item(Apple())
         if keys[pygame.K_1]:
             pass
         if pygame.mouse.get_pressed()[0]:
@@ -178,6 +176,10 @@ class Player(pygame.sprite.Sprite):
 
     def collisions(self, direction):
         for sprite in self.obstacle_sprites.sprites():
+            for apple in self.apple_sprites.sprites():
+                if apple.hitbox.colliderect(self.hitbox) and (apple.chest_is_open == False):
+                    self.inventory.add_inventory_item(Apple())
+                    apple.kill()
             if hasattr(sprite, 'hitbox'):
                 if sprite.hitbox.colliderect(self.hitbox):
                     if direction == "horizontal":
@@ -285,10 +287,12 @@ class Inventory(Player):
         self.weapon = None
 
     def add_inventory_item(self, item):
-        for inventory_slot in self.player_items:
+        for inventory_slot in range(len(self.player_items)):
             if self.player_items[inventory_slot] is None:
-                # item should be a class
+                # item should be an object
                 self.player_items[inventory_slot] = item
+            else:
+                pass
 
     def remove_inventory_item(self, item_pos):
         self.player_items[item_pos] = None

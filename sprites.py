@@ -10,8 +10,6 @@ from settings import *
 
 os.chdir(os.getcwd())
 
-apple_pos = [(30, 30)]
-
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, position, surface, groups, z=LAYERS['main']):
@@ -20,16 +18,23 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=position)
         self.z = z
         self.hitbox = self.rect.copy().inflate(-self.rect.width*0.7, -self.rect.height*0.7)
-        self.name = "object"
-
-    def get_name(self):
-        return self.name
 
 
 class Trees(Tile):
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
         self.hitbox = self.rect.copy().inflate(-self.rect.width*1, -self.rect.height*1)
+
+
+class Apple(pygame.sprite.Sprite):
+    def __init__(self, position, groups=None):
+        super().__init__(groups)
+        self.image = pygame.image.load("./graphics/sprites/item_sprites/apple_inventory.png")
+        self.apple_pos = position
+        self.chest_is_open = False
+        self.rect = self.image.get_rect(topleft=position)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
+        self.z = LAYERS['apple']
 
 
 class City(Tile):
@@ -42,31 +47,19 @@ class Chest(Tile):
     def __init__(self, position, surface, groups):
         super().__init__(position, surface, groups)
         self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
-        self.name = "chest"
+        self.chest = True
+        self.chest_rect = pygame.Rect(self.rect.left, self.rect.top, self.rect.x, self.rect.y)
 
-        self.apples_surf = pygame.image.load("./graphics/sprites/item_sprites/apple.png")
-        self.apple_pos = self.rect
-        self.apple_sprites = pygame.sprite.Group()
+        self.apples_surf = pygame.image.load("./graphics/sprites/item_sprites/apple_inventory.png")
+        self.apple_pos = position
 
     def open(self):
         self.image = pygame.image.load("./graphics/chests/chest_open.png")
         self.create_apple()
 
     def create_apple(self):
-        Tile(pos=apple_pos,
-             surface=self.apples_surf,
-             groups=[self.apple_sprites, self.groups()[0]],
-             z=LAYERS['apple'])
-
-    def chest_click(self):
-        if pygame.mouse.get_pressed()[0] and self.rect.collidepoint(pygame.mouse.get_pos()):
-            print("hi")
-            self.open()
-        else:
-            pass
-
-    def get_name(self):
-        return self.name
+        Apple(position=self.apple_pos, groups=[self.groups()[0], self.groups()[2]])
+        self.chest_is_open = True
 
 
 class Sprites:
@@ -82,6 +75,7 @@ class Sprites:
         self.obstacle_sprites = pygame.sprite.Group()
         self.bot_group = pygame.sprite.Group()
         self.chest_group = pygame.sprite.Group()
+        self.apple_sprites = pygame.sprite.Group()
         self.floor_items = pygame.sprite.Group()
         self.bullet_sprites = pygame.sprite.Group()
 
@@ -139,9 +133,16 @@ class Sprites:
     def run(self, dt, actions):
         self.screen.fill('black')
         self.sprite_group.custom_draw(self.player)
-        # self.chest_click()
+        mouse_pos = list(pygame.mouse.get_pos())
+        mouse_pos[0] += self.sprite_group.offset.x
+        mouse_pos[1] += self.sprite_group.offset.y
+        for sprite in self.obstacle_sprites.sprites():
+            if hasattr(sprite, 'chest'):
+                if pygame.mouse.get_pressed()[0] and sprite.chest_rect.collidepoint(mouse_pos):
+                    sprite.open()
+
         # self.screen.blit(self.cursor_image, player.Player.print_crosshair(self.screen))
-        self.sprite_group.update(dt, self.bullet_sprites, self.player.hitbox, self.bot_group, actions)
+        self.sprite_group.update(dt, self.bullet_sprites, self.player.hitbox, self.bot_group, self.apple_sprites, actions)
         if self.player.get_hitpoints() <= 0:
             for sprite in self.bot_group:
                 sprite.kill()

@@ -7,6 +7,7 @@ description: this module contains all information about any certain bot guard, i
 import pygame
 from settings import LAYERS
 import random
+import sprites
 
 
 class Bot(pygame.sprite.Sprite):
@@ -18,6 +19,7 @@ class Bot(pygame.sprite.Sprite):
 
     def __init__(self, position, sprite_group, obstacle_sprites, screen, bullet_sprites, z):
         super().__init__(sprite_group)
+        self.dead = None
         self.bullet_sprites = bullet_sprites
         self.engage_sounds = [pygame.mixer.Sound("./audio/Enemy_Contact.mp3"),
                               pygame.mixer.Sound("./audio/Enemy_Contact_2.mp3")]
@@ -75,7 +77,7 @@ class Bot(pygame.sprite.Sprite):
                     if self.inventory.armor_value < 0:
                         self.inventory.player_hitpoints += sprite.bullet_damage
                         self.inventory.armor_value = 0
-                sprite.kill()
+                self.dead = True
                 # return fire by the AI
                 self.return_fire = True
                 if self.already_said_enemy_contact is False:

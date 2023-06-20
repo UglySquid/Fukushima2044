@@ -39,12 +39,22 @@ class Bot(pygame.sprite.Sprite):
 
         self.image = self.sprite_right
         self.rect = self.image.get_rect()
-        self.rect.center = position
+        self.rect.center = self.position
 
+        self.x_direction = 0
+        self.y_direction = 0
+
+        self.speed = 1
+        self.directions = [
+            (0, -1),  # Up
+            (1, 0),  # Right
+            (0, 1),  # Down
+            (-1, 0)  # Left
+        ]
         self.change_direction_timer = pygame.time.get_ticks()
         self.patrol_timer = pygame.time.get_ticks()
         self.patrol_duration = 2000  # 2 seconds
-        self.walking_direction = random.randint(1, 4)
+        self.walking_direction = random.randint(0, 3)
 
         self.obstacle_sprites = obstacle_sprites
         self.death_sounds = [pygame.mixer.Sound("./audio/death_sound.wav"),
@@ -56,33 +66,17 @@ class Bot(pygame.sprite.Sprite):
         self.z = LAYERS['main']
 
     def move_ai(self):
-        speed = 0.1
         if self.inventory.weapon is not None:
             self.image = self.sprite_right
 
         if pygame.time.get_ticks() - self.change_direction_timer >= self.patrol_duration:
             self.change_direction_timer = pygame.time.get_ticks()
             self.patrol_timer = pygame.time.get_ticks()
-            self.walking_direction += random.randint(1, 4)
-            if self.walking_direction > 4:
-                self.walking_direction = 0
+            self.walking_direction = random.randint(0, 3)
 
-        if pygame.time.get_ticks() - self.patrol_timer <= self.patrol_duration / 2:
-            self.x_direction = 0
-            self.y_direction = 0
         else:
-            if self.walking_direction == 4:  # right
-                self.x_direction = speed
-                self.y_direction = 0
-            elif self.walking_direction == 2:  # up
-                self.x_direction = 0
-                self.y_direction = -speed
-            elif self.walking_direction == 3:  # left
-                self.x_direction = -speed
-                self.y_direction = 0
-            elif self.walking_direction == 1:  # down
-                self.x_direction = 0
-                self.y_direction = speed
+            self.x_direction = self.speed * self.directions[self.walking_direction][0]
+            self.y_direction = self.speed * self.directions[self.walking_direction][1]
 
     def collisions(self, direction):
         for sprite in self.bullet_sprites.sprites():
@@ -154,13 +148,17 @@ class Bot(pygame.sprite.Sprite):
                     channel.play(self.gun_reloading_sound)
                     self.reloading_sound_played = True
                 self.inventory.weapon.reload()
-        if self.return_fire == False:
+
+        if not self.return_fire:
             self.hitbox.x += self.x_direction
             self.hitbox.y += self.y_direction
+            self.position = self.hitbox.topleft  # Update image position
+
+        self.rect.center = self.hitbox.center
+        self.inventory.weapon.display_gun(self.screen, self.image_position)
+
         self.collisions("horizontal")
         self.collisions("vertical")
-        self.rect.topleft = self.hitbox.topleft
-        self.inventory.weapon.display_gun(self.screen, self.image_position)
 
 
 class Inventory(Bot):

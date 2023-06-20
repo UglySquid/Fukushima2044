@@ -290,13 +290,6 @@ class Player(pygame.sprite.Sprite):
         self.bullet_sprites.draw(self.screen)
         self.bullet_sprites.update()
 
-    def print_crosshair(self):
-        cursor_pos = pygame.mouse.get_pos()
-        cursor_center_x = cursor_pos[0] - 11
-        cursor_center_y = cursor_pos[1] - 11
-        pygame.mouse.set_visible(False)
-        return cursor_center_x, cursor_center_y
-
 
 class Inventory(Player):
     def __init__(self, player_hitpoints, armor_value, screen):

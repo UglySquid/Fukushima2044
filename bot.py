@@ -140,12 +140,6 @@ class Bot(pygame.sprite.Sprite):
         self.rect.topleft = self.hitbox.topleft
         self.inventory.weapon.display_gun(self.screen, self.image_position)
 
-    def print_crosshair(self):
-        cursor_pos = pygame.mouse.get_pos()
-        cursor_center_x = cursor_pos[0] - 11
-        cursor_center_y = cursor_pos[1] - 11
-        return cursor_center_x, cursor_center_y
-
 
 class Inventory(Bot):
     def __init__(self, player_hitpoints, armor_value):
@@ -246,7 +240,6 @@ class Gun(Item):
                             self.bullet_damage)
             bullet_sprite_group.add(bullet)
             bullet.update()
-
 
     def reload(self):
         self.reload_start_time += 1

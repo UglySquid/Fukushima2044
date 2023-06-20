@@ -172,7 +172,7 @@ class Sprites:
             self.bot_group.add(guard)
 
         # number of guards not working
-        # bots always spawn at the top left corner
+        # bots always spawn in the top left corner
 
     def run(self, dt, actions):
         for sprite in self.bot_group:

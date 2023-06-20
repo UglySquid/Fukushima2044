@@ -123,6 +123,7 @@ class GameOver(State):
         self.gameover_text = pygame.transform.scale(self.gameover_text,
                                                     (self.gameover_text.get_width() * 0.7,
                                                      self.gameover_text.get_height() * 0.7))
+
     def update(self, delta_time, actions):
         if actions["Title"]:
             new_state = Title(self.game)
@@ -266,6 +267,13 @@ class Level1(State):
         self.cursor_image = pygame.image.load('./graphics/UI/crosshair.png')
         self.cursor_image = pygame.transform.scale(self.cursor_image, (50, 50))
 
+    def print_crosshair(self):
+        cursor_pos = pygame.mouse.get_pos()
+        cursor_center_x = cursor_pos[0] - 11
+        cursor_center_y = cursor_pos[1] - 11
+        pygame.mouse.set_visible(False)
+        return cursor_center_x, cursor_center_y
+
     def update(self, delta_time, actions):
         # 'Events' part of ALTER framework, Action in IDEA, checks for all pause/win/lose events occurring from the game
         actions["Level1"] = True
@@ -298,7 +306,7 @@ class Level1(State):
         menu_btn.draw()
 
         if self.game.state_stack[0] == "Pause":
-            self.screen.blit(self.cursor_image, player.Player.print_crosshair(screen))
+            self.screen.blit(self.cursor_image, self.print_crosshair(screen))
 
         # Events (Check button presses)
         if menu_btn.press():
@@ -309,7 +317,7 @@ class Level1(State):
             self.game.actions["Game won"] = True
 
     def render_cursor(self, screen):
-        self.screen.blit(self.cursor_image, player.Player.print_crosshair(screen))
+        self.screen.blit(self.cursor_image, self.print_crosshair(screen))
 
 
 class Level2(State):

@@ -3,11 +3,11 @@ date: june 19th, 2023
 name: christine wei and william yang
 description: this is the program's mainline logic and calls all other files to start and display the game
 """
-import os
-import time
 
 # I - import
 import pygame
+import os
+import time
 
 import state
 
@@ -41,9 +41,14 @@ class Game:
                         "Title": False,
                         "Game over": False,
                         "return": False, "Game won": False}
+
+        # Initialize delta time (dt) and prev_time
         self.dt, self.prev_time = 0, 0
 
+        # Create empty state stack
         self.state_stack = []
+
+        # Load the first state (Title state)
         self.load_states()
 
     def run(self):
@@ -55,7 +60,7 @@ class Game:
             self.render()
 
     def get_events(self):
-        # Events
+        # Events (key presses, mouse presses)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.playing = False
@@ -103,9 +108,11 @@ class Game:
                     self.actions["return"] = False
 
     def update(self):
+        # R - REFRESH
         self.state_stack[-1].update(self.dt, self.actions)
 
     def render(self):
+        # RENDER THE GAME STATE
         self.state_stack[-1].render(self.screen)
         # FPS / Clock
         pygame.display.flip()

@@ -200,7 +200,7 @@ class Sprites:
         elif actions["Level2"]:
             num_guards = 20
         for guard in range(num_guards):
-            guard = bot.Bot((random.randint(400, 2800), random.randint(400, 2800)),
+            guard = bot.Bot((random.randint(600, 2600), random.randint(600, 2600)),
                             [self.sprite_group, self.obstacle_sprites, self.bot_group],
                             self.obstacle_sprites,
                             self.screen, self.bullet_sprites,
@@ -231,6 +231,7 @@ class Sprites:
         for chest in self.apple_sprites.sprites():
             if hasattr(chest, 'chest') and not chest.chest_is_open:
                 if pygame.mouse.get_pressed()[0] and chest.chest_rect.collidepoint(mouse_pos):
+                    print(chest.apple_pos, chest.chest_is_open)
                     chest.open()
 
         self.sprite_group.update(dt, self.bullet_sprites, self.player.image_position, self.bot_group, actions)

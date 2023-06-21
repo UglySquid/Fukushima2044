@@ -19,6 +19,7 @@ from settings import *
 # Set working directory to current directory so that it is easier to find files
 os.chdir(os.getcwd())
 
+
 # CLASSES
 class Tile(pygame.sprite.Sprite):
     """
@@ -61,7 +62,7 @@ class City(Tile):
 
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.5, -self.rect.height * 0.5)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.3, -self.rect.height * 0.4)
 
 
 class Chest(Tile):

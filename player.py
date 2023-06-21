@@ -102,8 +102,6 @@ class Player(pygame.sprite.Sprite):
         self.hitbox = self.rect.inflate(-4, -4)
 
         self.reload_pressed = None
-        self.my_hitbox_visualizer = pygame.Surface(self.hitbox.size)
-        self.my_hitbox_visualizer.fill((255, 0, 0))
 
     def import_assets(self):
         self.player_animations = {'up': [], 'down': [], 'right': [], 'left': [],
@@ -165,8 +163,7 @@ class Player(pygame.sprite.Sprite):
                     if mouse_pos[1] in range(600, 695):
                         if self.inventory.player_items[i] is not None and not self.mouse_clicked:
 
-                            if self.inventory.player_items[i].get_item_info()[
-                                0] == "gun" and self.inventory.weapon is not None:
+                            if self.inventory.player_items[i].get_item_info()[0] == "gun" and self.inventory.weapon is not None:
                                 self.inventory.weapon = None
                                 continue
                             self.inventory.use_inventory_item(i, self.inventory.player_items[i].get_item_info())
@@ -272,8 +269,6 @@ class Player(pygame.sprite.Sprite):
             self.dead = True
         if self.inventory.check_win_condition():
             self.won = True
-        self.screen.blit(self.my_hitbox_visualizer, self.hitbox.topleft)
-        self.keyboard_input()
 
         if self.inventory.weapon and self.reload_pressed is not None:
             if self.inventory.weapon.bullet_capacity != self.inventory.weapon.max_bullet_capacity:
@@ -281,6 +276,7 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.reload_pressed = None
 
+        # Check keyboard input
         self.keyboard_input()
         self.get_status()
 
@@ -499,6 +495,11 @@ class Gun(Item):
                          self.gun_inventory)
 
     def display_gun(self, screen):
+        """
+        Displays the gun on the screen beside the player
+        :param screen:
+        :return:
+        """
         gun_name_text = self.gun_font.render(self.gun_type, True, (255, 255, 255))
         bullet_count_text = self.gun_font.render(str(self.bullet_capacity), True, (255, 255, 255))
         forward_slash = self.gun_font.render("/", True, (255, 255, 255))
@@ -510,6 +511,14 @@ class Gun(Item):
         screen.blit(self.bullet_capacity_text, (75, 590))
 
     def shoot(self, screen, mouse_position, bullet_sprite_group, obstacle_sprites):
+        """
+        When this method is run and when the player has bullets, it will shoot bullets and play shooting sound
+        :param screen:
+        :param mouse_position:
+        :param bullet_sprite_group:
+        :param obstacle_sprites:
+        :return:
+        """
         if self.bullet_capacity > 0:
             channel2 = pygame.mixer.Channel(1)
             channel2.play(self.gun_firing_sound)
@@ -545,9 +554,10 @@ class Gun(Item):
                 bullet.update()
 
     def reload(self):
+        # Allows player to reload gun
         self.reload_start_time += 1
         self.image = self.gun_reloading
-        # make sure that they can't shoot if they are reloading
+        # Makes sure that they can't shoot if they are reloading
         self.bullet_capacity = 0
         if self.reload_start_time >= self.reload_time:
             self.bullet_capacity = self.max_bullet_capacity  # refill the magazine after reload
@@ -556,6 +566,9 @@ class Gun(Item):
 
 
 class Bullet(pygame.sprite.Sprite):
+    """
+    Bullet class, called everytime the player shoots
+    """
     def __init__(self, mouse_position, gun_image, obstacle_sprites, screen, custom_direction, hitbox, damage):
         super().__init__()
         self.bullet_damage = damage

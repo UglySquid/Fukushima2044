@@ -4,10 +4,11 @@ name: christine wei and william yang
 description: this module contains all information about any certain bot guard, including position, inventory, items, etc.
 """
 
-import pygame
-from settings import LAYERS
 import random
-import sprites
+
+import pygame
+
+from settings import LAYERS
 
 
 class Bot(pygame.sprite.Sprite):
@@ -83,7 +84,6 @@ class Bot(pygame.sprite.Sprite):
                 self.x_direction = 0 * self.directions[self.walking_direction][0]
                 self.y_direction = 0 * self.directions[self.walking_direction][1]
 
-
     def collisions(self, direction):
         for sprite in self.bullet_sprites.sprites():
             if sprite.rect.colliderect(self.image_position):
@@ -130,7 +130,8 @@ class Bot(pygame.sprite.Sprite):
 
             self.return_fire_counter += 1
             if self.return_fire_counter % 45 == 0:
-                self.inventory.weapon.shoot(self.screen, player_position, bullet_sprites, self.obstacle_sprites, self.image_position)
+                self.inventory.weapon.shoot(self.screen, player_position, bullet_sprites, self.obstacle_sprites,
+                                            self.image_position)
         if self.inventory.player_hitpoints <= 0:
             print(self.inventory.player_hitpoints)
             channel7 = pygame.mixer.Channel(6)
@@ -260,7 +261,6 @@ class Gun(Item):
             self.bullet_capacity -= 1
             gun_firing_png = pygame.image.load(self.gun_firing)
             screen.blit(gun_firing_png, bot_location)
-            print("hi")
             # mouse position replaced with player position
             bullet = Bullet(player_position, gun_firing_png, obstacle_sprites, screen, None, bot_location,
                             self.bullet_damage)

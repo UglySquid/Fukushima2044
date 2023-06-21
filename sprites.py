@@ -8,25 +8,15 @@ centered camera
 # I - import
 import os
 import random
-import player
+
 import pygame
-import bot
-from pytmx.util_pygame import load_pygame
-from settings import *
-
-os.chdir(os.getcwd())
-
-
-import os
-import random
-
-import player
-import pygame
-import bot
 from pytmx.util_pygame import load_pygame
 
+import bot
+import player
 from settings import *
 
+# Set working directory to current directory so that it is easier to find files
 os.chdir(os.getcwd())
 
 
@@ -34,12 +24,13 @@ class Tile(pygame.sprite.Sprite):
     """
     Generic class tile. Parent class for all the tile objects
     """
+
     def __init__(self, position, surface, groups, z=LAYERS['main']):
         super().__init__(groups)
         self.image = surface
         self.rect = self.image.get_rect(topleft=position)
         self.z = z
-        self.hitbox = self.rect.copy().inflate(-self.rect.width*0.7, -self.rect.height*0.7)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.7, -self.rect.height * 0.7)
 
 
 class Apple(pygame.sprite.Sprite):
@@ -57,15 +48,17 @@ class Trees(Tile):
     """
     this class contains the tree tiles that are present in the in game world
     """
+
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
-        self.hitbox = self.rect.copy().inflate(-self.rect.width*1, -self.rect.height*1)
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 1, -self.rect.height * 1)
 
 
 class City(Tile):
     """
     this class contains the city (building) tiles that are present in the in game world
     """
+
     def __init__(self, position, surface, groups, name):
         super().__init__(position, surface, groups)
         self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.5, -self.rect.height * 0.5)
@@ -75,6 +68,7 @@ class Chest(Tile):
     """
     this class contains the chest tiles that are present in the in game world (spawn open objects)
     """
+
     def __init__(self, position, surface, groups):
         super().__init__(position, surface, groups)
         self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
@@ -124,11 +118,22 @@ class Sprites:
         self.screen.fill((114, 117, 27))
         tmx_data = load_pygame('./data/tmx/fuki4.tmx')
 
+        # Map borders made with stone walls
+        # for x, y, surf in tmx_data.get_layer_by_name("Borders").tiles():
+        #     pos = (x * 32, y * 32)
+        #     Tile(position=pos, surface=surf, groups=[self.sprite_group, self.obstacle_sprites], z=LAYERS['Borders'])
+
         # facility
-        for layer in ["Facility", "Facility Deco", "Facility Deco 2"]:
+        for x, y, surf in tmx_data.get_layer_by_name("Facility").tiles():
+            pos = (x * 32, y * 32)
+            Tile(position=pos, surface=surf, groups=[self.sprite_group, self.obstacle_sprites],
+                 z=LAYERS['Facility'])
+
+        # Facility Decorations
+        for layer in ["Facility Deco", "Facility Deco 2"]:
             for x, y, surf in tmx_data.get_layer_by_name(layer).tiles():
                 pos = (x * 32, y * 32)
-                Tile(position=pos, surface=surf, groups=[self.sprite_group, self.obstacle_sprites],
+                Tile(position=pos, surface=surf, groups=[self.sprite_group],
                      z=LAYERS['Facility'])
 
         # OBJECT LAYERS
@@ -142,7 +147,8 @@ class Sprites:
         for obj in tmx_data.get_layer_by_name('Chests'):
             Chest((obj.x, obj.y), obj.image, [self.sprite_group, self.obstacle_sprites, self.apple_sprites])
 
-        self.player = player.Player((1600, 1600), self.sprite_group, self.obstacle_sprites, self.bullet_sprites, self.apple_sprites, self.screen)
+        self.player = player.Player((1600, 1600), self.sprite_group, self.obstacle_sprites, self.bullet_sprites,
+                                    self.apple_sprites, self.screen)
 
         Tile(
             position=(0, 0),
@@ -162,7 +168,6 @@ class Sprites:
                             self.obstacle_sprites,
                             self.screen, self.bullet_sprites,
                             z=LAYERS["main"])
-
 
             self.bot_group.add(guard)
 
@@ -205,6 +210,7 @@ class CameraGroup(pygame.sprite.Group):
     this class contains the player-centered camera in the game, keeping the player visible at all times, representing
     the Refresh Screen part of the ALTER framework or the Display/Action part of the IDEA framework
     """
+
     def __init__(self):
         super().__init__()
         self.screen = pygame.display.get_surface()
@@ -224,4 +230,3 @@ class CameraGroup(pygame.sprite.Group):
                     offset_rect.center -= self.offset
                     sprite.image_position = offset_rect
                     self.screen.blit(sprite.image, offset_rect)
-

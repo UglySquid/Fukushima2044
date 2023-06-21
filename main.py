@@ -3,22 +3,24 @@ date: june 19th, 2023
 name: christine wei and william yang
 description: this is the program's mainline logic and calls all other files to start and display the game
 """
-# I - import
-import pygame
-
-import player
-import state
-
 import os
 import time
 
+# I - import
+import pygame
+
+import state
+
+# Set working directory to current directory so that it is easier to find files
 os.chdir(os.getcwd())
 
 
+# GAME CLASS
 class Game:
     """
     this is the main game class, defining the game window and calling all other functions to allow the game to run
     """
+
     def __init__(self):
         # Initialize
         pygame.init()
@@ -125,6 +127,7 @@ class Game:
     def reset_keys(self):
         for action in self.actions:
             self.actions[action] = False
+
 
 # start the action
 game = Game()

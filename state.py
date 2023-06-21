@@ -153,7 +153,6 @@ class HowTo(State):
 
         # Check for events
         if self.close_btn.press():
-            print("Hi")
             self.game.actions["return"] = True
 
 

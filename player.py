@@ -4,6 +4,7 @@ name: christine wei and william yang
 description: this module contains all information about the player, including position, inventory, items, etc.
 """
 
+# IMPORTS
 import os
 import random
 
@@ -11,6 +12,7 @@ import pygame
 
 from settings import *
 
+# Set working directory to current directory so that it is easier to find files
 os.chdir(os.getcwd())
 
 
@@ -124,7 +126,7 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_r]:
             if self.inventory.weapon is not None:
                 self.reload_pressed = True
-                self.gun_reloading_sound = pygame.mixer.Sound("audio\\gun_reload.mp3")
+                self.gun_reloading_sound = pygame.mixer.Sound("./audio/gun_reload.mp3")
                 channel3 = pygame.mixer.Channel(2)
                 channel3.play(self.gun_reloading_sound)
         if keys[pygame.K_a]:
@@ -163,7 +165,8 @@ class Player(pygame.sprite.Sprite):
                     if mouse_pos[1] in range(600, 695):
                         if self.inventory.player_items[i] is not None and not self.mouse_clicked:
 
-                            if self.inventory.player_items[i].get_item_info()[0] == "gun" and self.inventory.weapon is not None:
+                            if self.inventory.player_items[i].get_item_info()[
+                                0] == "gun" and self.inventory.weapon is not None:
                                 self.inventory.weapon = None
                                 continue
                             self.inventory.use_inventory_item(i, self.inventory.player_items[i].get_item_info())

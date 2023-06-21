@@ -19,6 +19,7 @@ class Bot(pygame.sprite.Sprite):
 
     def __init__(self, position, sprite_group, obstacle_sprites, screen, bullet_sprites, z):
         super().__init__(sprite_group)
+        self.bot_dead = False
         self.dead = None
         self.bullet_sprites = bullet_sprites
         self.engage_sounds = [pygame.mixer.Sound("./audio/Enemy_Contact.mp3"),
@@ -134,7 +135,7 @@ class Bot(pygame.sprite.Sprite):
             print(self.inventory.player_hitpoints)
             channel7 = pygame.mixer.Channel(6)
             channel7.play(self.death_sounds[random.randint(0, 2)])
-            self.kill()
+            self.bot_dead = True
 
         if self.inventory.weapon is not None:
             if self.change_direction_timer == 0:

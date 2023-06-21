@@ -8,5 +8,6 @@ Amid political unrest in Japan, a biological facility explodes in Fukushima, pro
 2. Your goal is to complete the quest of the level. For level 1, you must kill 10 AI. For level 2, you must kill 20 AI and have armor. 
 3. To play, use controls W, A, S, D to move up, left, down, right and your mouse.
 4. If you are losing too much HP, try eating an apple!
-5. If you want some immunity, try using the armor!
-6. To open chests, simply click on the chests. To collect items, simply walk until you touch the object and the object will automatically be added to your inventory. 
+5. If you not longer have any bullets, click the "r" key to reload!
+6. If you want some immunity, try using the armor!
+7. To open chests, simply click on the chests. To collect items, simply walk until you touch the object and the object will automatically be added to your inventory. 

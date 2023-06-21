@@ -38,6 +38,7 @@ class Apple(pygame.sprite.Sprite):
     """
     One of the very nice items in our game. When used, gives user extra health
     """
+
     def __init__(self, position, groups=None):
         super().__init__(groups)
         self.image = pygame.image.load("./graphics/sprites/item_sprites/apple_inventory.png")
@@ -52,10 +53,11 @@ class Armor(pygame.sprite.Sprite):
     """
     One of the very nice items in our game. When used, gives user partial immunity from gunshots
     """
+
     def __init__(self, position, groups):
         super().__init__(groups)
         self.image = pygame.image.load("./graphics/sprites/item_sprites/armor.png")
-        self.is_apple = True
+        self.is_armor = True
         self.apple_pos = position
         self.rect = self.image.get_rect(topleft=position)
         self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.65)
@@ -227,7 +229,7 @@ class Sprites:
 
         # Check if a chest has been clicked
         for chest in self.apple_sprites.sprites():
-            if hasattr(chest, 'chest'):
+            if hasattr(chest, 'chest') and not chest.chest_is_open:
                 if pygame.mouse.get_pressed()[0] and chest.chest_rect.collidepoint(mouse_pos):
                     chest.open()
 

@@ -192,11 +192,15 @@ class Player(pygame.sprite.Sprite):
                             self.inventory.remove_inventory_item(i)
 
     def collisions(self, direction):
-        for apple in self.apple_sprites.sprites():
-            if hasattr(apple, 'is_apple'):
-                if apple.hitbox.colliderect(self.hitbox):
+        for item in self.apple_sprites.sprites():
+            if hasattr(item, 'is_apple'):
+                if item.hitbox.colliderect(self.hitbox):
                     self.inventory.add_inventory_item(Apple())
-                    apple.kill()
+                    item.kill()
+            elif hasattr(item, 'is_armor'):
+                if item.hitbox.colliderect(self.hitbox):
+                    self.inventory.add_inventory_item(Apple())
+                    item.kill()
         for sprite in self.bullet_sprites.sprites():
             if sprite.rect.colliderect(self.image_position):
                 channel5 = pygame.mixer.Channel(4)

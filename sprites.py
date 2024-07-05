@@ -243,7 +243,7 @@ class Sprites:
         # Check for dead sprites
         for sprite in self.bot_group:
             if sprite.bot_dead:
-                Armor(sprite.position, [self.sprite_group, self.apple_sprites])
+                Apple(sprite.position, [self.sprite_group, self.apple_sprites])
                 sprite.kill()
 
     def update(self):

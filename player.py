@@ -1,11 +1,12 @@
 """
 date: june 19th, 2023
-name: christine wei and william yang
+name: william yang
 description: this module contains all information about the player, including position, inventory, items, etc.
 """
 
 # IMPORTS
 import os
+
 import random
 
 import pygame
@@ -100,6 +101,7 @@ class Player(pygame.sprite.Sprite):
 
         # new method I found online to change the hitbox so that its smaller
         self.hitbox = self.rect.inflate(-4, -4)
+
 
         self.reload_pressed = None
 
@@ -308,8 +310,8 @@ class Inventory(Player):
         self.objective_background_bar = pygame.transform.scale(
             pygame.image.load("./graphics/sprites/item_sprites/inventory_back.png"), (270, 100))
         self.objective_font = pygame.font.SysFont("Arial", 20)
-        self.objective_text = self.objective_font.render(" Objective: Kill 10 AI", True, (255, 255, 255))
-        self.objective_text_2 = self.objective_font.render(" Objective: Kill 20 AI, Get Armor", True, (255, 255, 255))
+        self.objective_text = self.objective_font.render(" Objective: Eliminate 10 AI", True, (255, 255, 255))
+        self.objective_text_2 = self.objective_font.render(" Objective: Eliminate 20 AI, Get Special Armor", True, (255, 255, 255))
         self.armor_value = armor_value
         self.player_items = [Apple(), Gun("shotgun"), Gun("rifle"), Gun("sniper"), Gun("pistol"), Armor()]
         self.inventory_sprite = pygame.transform.scale(

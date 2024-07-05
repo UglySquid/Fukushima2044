@@ -328,8 +328,7 @@ class Level1(State):
             new_state = PauseMenu(self.game)
             new_state.enter_state()
         if actions["Game over"]:
-            for group in [self.sprites.obstacle_sprites, self.sprites.bot_group, self.sprites.chest_group,
-                          self.sprites.floor_items,
+            for group in [self.sprites.obstacle_sprites, self.sprites.bot_group,
                           self.sprites.bullet_sprites]:
                 for sprite in group:
                     sprite.kill()
@@ -396,7 +395,6 @@ class Level2(State):
             new_state.enter_state()
         if actions["Game over"]:
             for group in [self.sprites.obstacle_sprites, self.sprites.bot_group, self.sprites.chest_group,
-                          self.sprites.floor_items,
                           self.sprites.bullet_sprites]:
                 for sprite in group:
                     sprite.kill()

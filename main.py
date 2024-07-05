@@ -1,6 +1,6 @@
 """
 date: june 19th, 2023
-name: christine wei and william yang
+name: william yang
 description: this is the program's mainline logic and calls all other files to start and display the game
 """
 
